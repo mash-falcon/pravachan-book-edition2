@@ -33,6 +33,8 @@ def as_app_data(day: dict) -> dict:
                       for s in day["sentences"]],
         "groups": {str(s["n"]): s["group"] for s in day["sentences"] if s.get("group")},
         "points": [[p["mr"], p["en"], p["anchor"]] for p in day.get("commentary", [])],
+        # path is relative to the repo root; the apps sit two levels down
+        "page_image": day.get("source", {}).get("page_image"),
     }
 
 

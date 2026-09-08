@@ -333,8 +333,8 @@ body[data-marks="off"] .prov{opacity:.25}
   <h4>Facsimile · मूळ पान</h4>
   <p>The scanned original. The hand underlines here are the source of the gold rules and
   numbered notes on the typeset page — compare them directly.</p>
-  <img id="faxImg" src="source/Edn2_Jan01.JPG" alt="Scanned original of the 1 January page">
-  <div class="slot" id="faxSlot" hidden>source/Edn2_Jan01.JPG — not found</div>
+  <img id="faxImg" alt="Scanned original of this page">
+  <div class="slot" id="faxSlot" hidden></div>
 </div>
 
 <div class="gloss" id="gloss">
@@ -553,8 +553,14 @@ document.getElementById('bTheme').onclick=()=>
 document.getElementById('bFax').onclick=e=>{const f=document.getElementById('fax');
   f.hidden=!f.hidden;e.target.classList.toggle('on',!f.hidden);
   if(!f.hidden)f.scrollIntoView({behavior:'smooth',block:'start'})};
-document.getElementById('faxImg').onerror=function(){this.hidden=true;
-  document.getElementById('faxSlot').hidden=false};
+/* the scan path comes from the day file, not from the template */
+(function(){
+  const img=document.getElementById('faxImg'), slot=document.getElementById('faxSlot');
+  const rel=DATA.page_image ? '../../'+DATA.page_image : null;
+  slot.textContent=(DATA.page_image||'no page image recorded for this day')+' — not found';
+  img.onerror=function(){this.hidden=true;slot.hidden=false};
+  if(rel){img.src=rel} else {img.hidden=true;slot.hidden=false}
+})();
 document.getElementById('bPrint').onclick=()=>print();
 addEventListener('keydown',e=>{if(e.key==='t'||e.key==='T')document.getElementById('bTheme').click()});
 addEventListener('resize',()=>{place();checkFit()});
