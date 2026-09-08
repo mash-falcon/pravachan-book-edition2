@@ -40,17 +40,55 @@ def char_accuracy(gold: str, draft: str) -> float:
     return difflib.SequenceMatcher(None, gold, draft).ratio()
 
 
+def measure(gold: dict, draft: dict) -> dict:
+    """The numbers, without the prose. Used by score.py and by bakeoff.py."""
+    g = {s["n"]: s for s in gold["sentences"]}
+    d = {s["n"]: s for s in draft.get("sentences", [])}
+    shared = sorted(set(g) & set(d))
+    exact = modern = different = 0
+    for n in shared:
+        v = classify(g[n]["mr"], d[n]["mr"])
+        if v == "exact":
+            exact += 1
+        elif v.startswith("MODERNISED"):
+            modern += 1
+        else:
+            different += 1
+    gh = {n for n, s in g.items() if s["highlight"]}
+    dh = {n for n, s in d.items() if s.get("highlight")}
+    tp, fp, fn = len(gh & dh), len(dh - gh), len(gh - dh)
+    prec = tp / (tp + fp) if tp + fp else 0.0
+    rec = tp / (tp + fn) if tp + fn else 0.0
+    return {
+        "sentences_gold": len(g), "sentences_draft": len(d),
+        "exact": exact, "modernised": modern, "different": different,
+        "char_accuracy": (sum(char_accuracy(g[n]["mr"], d[n]["mr"]) for n in shared) / len(shared))
+                          if shared else 0.0,
+        "mark_precision": prec, "mark_recall": rec,
+        "mark_f1": (2 * prec * rec / (prec + rec)) if prec + rec else 0.0,
+        "marks_invented": sorted(dh - gh), "marks_missed": sorted(gh - dh),
+        "translated": sum(1 for n in shared if d[n].get("en")),
+        "usable": modern == 0 and len(g) == len(d),
+    }
+
+
 def main() -> None:
-    if len(sys.argv) != 2:
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if len(args) != 1:
         raise SystemExit(__doc__)
-    day_id = sys.argv[1]
+    day_id = args[0]
+    draft_flag = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--draft=")), None)
     gold_p = ROOT / "content" / "days" / f"{day_id}.json"
-    draft_p = ROOT / "content" / "drafts" / f"{day_id}.json"
+    draft_p = pathlib.Path(draft_flag) if draft_flag else ROOT / "content" / "drafts" / f"{day_id}.json"
     for p in (gold_p, draft_p):
         if not p.exists():
             raise SystemExit(f"missing {p.relative_to(ROOT)}")
     gold = json.loads(gold_p.read_text(encoding="utf-8"))
     draft = json.loads(draft_p.read_text(encoding="utf-8"))
+
+    if "--json" in sys.argv:
+        print(json.dumps(measure(gold, draft), ensure_ascii=False))
+        return
 
     g = {s["n"]: s for s in gold["sentences"]}
     d = {s["n"]: s for s in draft.get("sentences", [])}

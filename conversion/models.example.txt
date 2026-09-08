@@ -1,0 +1,27 @@
+# Candidates for the transcription bake-off, one per line.
+# Run:  python3 conversion/bakeoff.py 01-01 --models conversion/models.example.txt
+#
+# Purpose-built OCR — try this first for transcription. It is the only model here
+# whose actual job is turning printed pages into text.
+nvidia/baidu/paddleocr-vl
+
+# General vision-language models, as baselines and for underline detection.
+gcp/google/gemini-3.8-flash
+aws/anthropic/bedrock-claude-opus-4-8
+azure/openai/gpt-5.6-sol
+nvidia/nvidia/nemotron-3.5-super-vl-preview
+nvidia/meta/llama-3.2-90b-vision-instruct
+nvidia/nvidia/nemotron-nano-12b-v2-vl
+
+# NOT usable here — retrieval components, not generators. They embed or rerank,
+# they do not produce text. Listed so nobody wastes a run on them:
+#   nvidia/qwen/qwen3-vl-embedding-8b
+#   nvidia/qwen/qwen3-vl-reranker-8b
+#   nvidia/nvidia/llama-nemotron-embed-vl-1b-v2
+#   nvidia/nvidia/llama-nemotron-rerank-vl-1b-v2
+#
+# Text-only — no use for transcription or marks, but candidates for --text-model
+# on the translation pass:
+#   nvidia/qwen/qwen3.5-122b-a10b
+#   nvidia/moonshotai/kimi-k3
+#   nvidia/zai-org/glm-5.3

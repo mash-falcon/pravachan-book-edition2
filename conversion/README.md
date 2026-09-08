@@ -53,6 +53,36 @@ Configuration is by flag or environment: `PRAVACHAN_BASE_URL` (default
 `http://localhost:11434/v1`), `PRAVACHAN_MODEL`, `PRAVACHAN_API_KEY`.
 Use `--text-model` to translate with a different, larger model than the vision one.
 
+Against a hosted gateway rather than a local server, set both:
+
+```bash
+export PRAVACHAN_BASE_URL=https://<your-gateway>/v1
+export PRAVACHAN_API_KEY=<token>
+```
+
+## Comparing models
+
+Which model to use is an empirical question, not one to settle from model names.
+
+```bash
+python3 conversion/bakeoff.py 01-01 --models conversion/models.example.txt
+```
+
+Runs each model over the same page and prints one table. It refuses to run on a day
+that has no verified file in `content/days/`, because there would be nothing to score
+against. Drafts go to `content/drafts/bakeoff/` and cannot reach the readers.
+
+**Rank on the MODERN column, not on char accuracy.** A model that rewrites नांव as
+नाव will show 99% character accuracy and be unusable. A model with a lower character
+score but zero modernisation is the better one, because its errors are visible.
+
+Two things the table will not tell you, and you must check by eye:
+
+- whether the translation is any good — it is scored only for coverage;
+- whether the underlines are right. Confirm every mark against the scan even at
+  100% F1. A mark the model invents attributes something to the previous reader
+  that they never marked.
+
 Drafts land in `content/drafts/` and **never** in `content/days/`. Only
 `accept.py --promote` moves them, and it requires a name.
 

@@ -84,9 +84,9 @@ def as_json(text: str, task: str):
 
 
 def run(day_id: str, tasks: list[str], base_url: str, model: str,
-        text_model: str, temperature: float) -> None:
+        text_model: str, temperature: float, out: str | None = None) -> None:
     DRAFTS.mkdir(exist_ok=True)
-    out_path = DRAFTS / f"{day_id}.json"
+    out_path = pathlib.Path(out) if out else DRAFTS / f"{day_id}.json"
     draft = json.loads(out_path.read_text(encoding="utf-8")) if out_path.exists() else {
         "id": day_id, "_draft": True,
         "_provenance": {"base_url": base_url, "vision_model": model,
@@ -162,10 +162,11 @@ def main() -> None:
     ap.add_argument("--text-model", default=None,
                     help="model for translation (defaults to --model)")
     ap.add_argument("--temperature", type=float, default=0.0)
+    ap.add_argument("--out", default=None, help="write the draft somewhere other than content/drafts/<day>.json")
     a = ap.parse_args()
     tasks = ["transcribe", "marks", "translate"] if a.task == "all" else [a.task]
     print(f"day {a.day} · {a.base_url}")
-    run(a.day, tasks, a.base_url, a.model, a.text_model or a.model, a.temperature)
+    run(a.day, tasks, a.base_url, a.model, a.text_model or a.model, a.temperature, a.out)
 
 
 if __name__ == "__main__":
