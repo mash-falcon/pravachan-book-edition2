@@ -7,6 +7,9 @@ source/pages/*.tif
 source/pages/*.tiff
 !source/pages/README.md
 
+# Model drafts are regenerable and must not be mistaken for verified content.
+content/drafts/*.json
+
 .DS_Store
 __pycache__/
 *.pyc
