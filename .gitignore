@@ -13,3 +13,6 @@ content/drafts/*.json
 .DS_Store
 __pycache__/
 *.pyc
+
+# local credentials
+.env

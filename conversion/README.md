@@ -60,6 +60,37 @@ export PRAVACHAN_BASE_URL=https://<your-gateway>/v1
 export PRAVACHAN_API_KEY=<token>
 ```
 
+## Trying one model first
+
+Before the bake-off, look at what a single model actually returns:
+
+```bash
+cp .env.example .env && $EDITOR .env && source .env
+
+python3 conversion/probe.py --list                                   # what the gateway offers
+python3 conversion/probe.py --model nvidia/baidu/paddleocr-vl --day 01-01
+python3 conversion/probe.py --model <a vision model> --day 01-01 --task marks
+python3 conversion/probe.py --model X --image any.png --prompt "Extract the text."
+```
+
+`probe.py` prints the raw response, latency, token counts and `finish_reason`, saves
+the full text to `content/drafts/probes/`, and then runs an **orthography check that
+needs no verified day file**: it counts whole Devanagari words and reports how often
+the model used the book's form (नांव, कांहीं, नाहीं, तें, हें) versus the modern one.
+
+That check is the fastest useful signal you can get from one call. On the 1 January
+text it reports 28 book forms and 0 modern forms for a faithful transcription, and
+the exact inverse for a modernised one.
+
+Note it counts **whole words**, not substrings — ते is inside होते and तेव्हां, हे is
+inside आहे, so substring counting flags a perfectly faithful page as modernised.
+
+### max_tokens
+
+A full page of Devanagari does not fit in 1024 tokens. The default here is **8192**,
+and both `probe.py` and `assist.py` warn when `finish_reason` comes back as `length`.
+If a model returns half a page, that is usually the cause, not the model.
+
 ## Comparing models
 
 Which model to use is an empirical question, not one to settle from model names.

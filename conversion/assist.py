@@ -39,7 +39,7 @@ def find_image(day_id: str) -> pathlib.Path:
 
 
 def call(base_url: str, model: str, prompt: str, image: pathlib.Path | None,
-         temperature: float) -> str:
+         temperature: float, max_tokens: int = 8192) -> str:
     content = [{"type": "text", "text": prompt}]
     if image is not None:
         mime = "image/png" if image.suffix.lower() == ".png" else "image/jpeg"
@@ -50,6 +50,7 @@ def call(base_url: str, model: str, prompt: str, image: pathlib.Path | None,
         "model": model,
         "messages": [{"role": "user", "content": content}],
         "temperature": temperature,
+        "max_tokens": max_tokens,
         "stream": False,
     }).encode()
     req = urllib.request.Request(
@@ -59,10 +60,17 @@ def call(base_url: str, model: str, prompt: str, image: pathlib.Path | None,
     try:
         with urllib.request.urlopen(req, timeout=1800) as r:
             payload = json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        raise SystemExit(f"HTTP {e.code} from {base_url}\n"
+                         + e.read().decode(errors="replace")[:600])
     except urllib.error.URLError as e:
-        raise SystemExit(f"cannot reach {base_url}: {e}\n"
-                         f"Is the local server running? Try: curl {base_url}/models")
-    return payload["choices"][0]["message"]["content"]
+        raise SystemExit(f"cannot reach {base_url}: {e.reason}\n"
+                         f"Check PRAVACHAN_BASE_URL. Try: python3 conversion/probe.py --list")
+    choice = payload["choices"][0]
+    if choice.get("finish_reason") == "length":
+        print("    WARNING: response hit the token limit and was cut off. "
+              "Re-run with a larger --max-tokens.", file=sys.stderr)
+    return choice["message"]["content"]
 
 
 def as_json(text: str, task: str):
@@ -84,7 +92,8 @@ def as_json(text: str, task: str):
 
 
 def run(day_id: str, tasks: list[str], base_url: str, model: str,
-        text_model: str, temperature: float, out: str | None = None) -> None:
+        text_model: str, temperature: float, out: str | None = None,
+        max_tokens: int = 8192) -> None:
     DRAFTS.mkdir(exist_ok=True)
     out_path = pathlib.Path(out) if out else DRAFTS / f"{day_id}.json"
     draft = json.loads(out_path.read_text(encoding="utf-8")) if out_path.exists() else {
@@ -102,7 +111,7 @@ def run(day_id: str, tasks: list[str], base_url: str, model: str,
     if "transcribe" in tasks:
         print(f"  transcribing with {model} …")
         r = as_json(call(base_url, model, (PROMPTS / "transcribe.md").read_text(encoding="utf-8"),
-                         image, temperature), "transcribe")
+                         image, temperature, max_tokens), "transcribe")
         draft["title_mr"] = r.get("title_mr", "")
         draft["date"] = {"label_mr": r.get("date_label_mr", ""), "label_en": ""}
         draft["sentences"] = [{"n": s["n"], "mr": s["mr"], "en": "", "highlight": 0}
@@ -119,7 +128,7 @@ def run(day_id: str, tasks: list[str], base_url: str, model: str,
         listing = "\n".join(f'{s["n"]}. {s["mr"]}' for s in draft["sentences"])
         prompt = (PROMPTS / "marks.md").read_text(encoding="utf-8") + "\n\nSENTENCES:\n" + listing
         print(f"  reading underlines with {model} …")
-        r = as_json(call(base_url, model, prompt, image, temperature), "marks")
+        r = as_json(call(base_url, model, prompt, image, temperature, max_tokens), "marks")
         under = set(r.get("underlined", []))
         for s in draft["sentences"]:
             s["highlight"] = 1 if s["n"] in under else 0
@@ -137,7 +146,7 @@ def run(day_id: str, tasks: list[str], base_url: str, model: str,
         listing = "\n".join(f'{s["n"]}. {s["mr"]}' for s in draft["sentences"])
         prompt = (PROMPTS / "translate.md").read_text(encoding="utf-8") + "\n\nSENTENCES:\n" + listing
         print(f"  translating with {text_model} …")
-        r = as_json(call(base_url, text_model, prompt, None, temperature), "translate")
+        r = as_json(call(base_url, text_model, prompt, None, temperature, max_tokens), "translate")
         en = {s["n"]: s["en"] for s in r.get("sentences", [])}
         for s in draft["sentences"]:
             s["en"] = en.get(s["n"], "")
@@ -162,11 +171,14 @@ def main() -> None:
     ap.add_argument("--text-model", default=None,
                     help="model for translation (defaults to --model)")
     ap.add_argument("--temperature", type=float, default=0.0)
+    ap.add_argument("--max-tokens", type=int, default=8192,
+                    help="Devanagari is token-hungry; 1024 truncates a full page")
     ap.add_argument("--out", default=None, help="write the draft somewhere other than content/drafts/<day>.json")
     a = ap.parse_args()
     tasks = ["transcribe", "marks", "translate"] if a.task == "all" else [a.task]
     print(f"day {a.day} · {a.base_url}")
-    run(a.day, tasks, a.base_url, a.model, a.text_model or a.model, a.temperature, a.out)
+    run(a.day, tasks, a.base_url, a.model, a.text_model or a.model, a.temperature,
+        a.out, a.max_tokens)
 
 
 if __name__ == "__main__":
