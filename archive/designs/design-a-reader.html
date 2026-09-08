@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>नाम — प्रवचने · Daily Reader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#faf6ef; --paper-2:#f3ece0; --ink:#241f1a; --ink-soft:#5c534a;
+  --rule:#ddd2c0; --accent:#9a5b2c; --accent-soft:#f0dcc4; --gold:#c08a3e;
+  --mark:linear-gradient(180deg, rgba(240,220,196,0) 58%, rgba(240,220,196,.95) 58%);
+  --shadow:0 1px 2px rgba(60,45,25,.06), 0 12px 40px -12px rgba(60,45,25,.18);
+  --measure:34rem;
+}
+[data-theme="night"]{
+  --paper:#14120f; --paper-2:#1c1915; --ink:#e8e0d3; --ink-soft:#a2988a;
+  --rule:#332d25; --accent:#d79a5e; --accent-soft:#3a2b1c; --gold:#c08a3e;
+  --mark:linear-gradient(180deg, rgba(90,64,36,0) 58%, rgba(90,64,36,.85) 58%);
+  --shadow:0 12px 40px -12px rgba(0,0,0,.6);
+}
+[data-theme="sepia"]{ --paper:#f2e6d0; --paper-2:#e9dbc0; --rule:#d5c3a2; }
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:'Spectral',Georgia,serif; font-size:var(--fs,19px); line-height:1.75;
+  -webkit-font-smoothing:antialiased; transition:background .4s,color .4s;
+}
+.ui{font-family:'Inter',system-ui,sans-serif}
+
+/* ---------- top bar ---------- */
+header{
+  position:sticky; top:0; z-index:20; backdrop-filter:blur(12px);
+  background:color-mix(in srgb, var(--paper) 82%, transparent);
+  border-bottom:1px solid var(--rule);
+}
+.bar{max-width:72rem;margin:0 auto;padding:.6rem 1.25rem;display:flex;align-items:center;gap:1rem}
+.brand{font-family:'Tiro Devanagari Marathi',serif;font-size:1.05rem;letter-spacing:.01em;white-space:nowrap}
+.brand small{display:block;font-family:'Inter',sans-serif;font-size:.62rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-soft)}
+.spacer{flex:1}
+.seg{display:flex;background:var(--paper-2);border:1px solid var(--rule);border-radius:999px;padding:2px}
+.seg button{
+  font-family:'Inter',sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.02em;
+  border:0;background:transparent;color:var(--ink-soft);padding:.34rem .78rem;border-radius:999px;cursor:pointer;
+  transition:.18s;
+}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.icon{border:1px solid var(--rule);background:var(--paper-2);color:var(--ink-soft);
+  width:2rem;height:2rem;border-radius:999px;cursor:pointer;font-size:.8rem;display:grid;place-items:center;transition:.18s}
+.icon:hover{color:var(--accent);border-color:var(--accent)}
+.progress{position:absolute;left:0;bottom:-1px;height:2px;background:var(--accent);width:0;transition:width .1s}
+
+/* ---------- page ---------- */
+main{max-width:72rem;margin:0 auto;padding:3.5rem 1.25rem 8rem;
+  display:grid;grid-template-columns:minmax(0,1fr) 16rem;gap:3.5rem;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr;gap:2rem;padding-top:2rem}}
+
+.dateline{font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:1rem}
+h1{font-family:'Tiro Devanagari Marathi',serif;font-weight:400;font-size:clamp(1.7rem,4.2vw,2.5rem);
+  line-height:1.35;margin:0 0 .35rem}
+.h1-en{font-style:italic;color:var(--ink-soft);font-size:1.05rem;margin:0 0 1.75rem}
+.ornament{display:flex;align-items:center;gap:.75rem;margin:0 0 2.25rem;color:var(--gold)}
+.ornament::before,.ornament::after{content:"";height:1px;background:var(--rule);flex:1}
+
+article{max-width:var(--measure)}
+.s{display:inline}
+.mr{font-family:'Tiro Devanagari Marathi',serif;line-height:2.05}
+.en{font-family:'Spectral',serif}
+.para{margin:0 0 1.5rem;text-align:left}
+
+/* highlight treatment: soft marker, not a harsh underline */
+.hl{background-image:var(--mark);background-repeat:no-repeat;
+  border-radius:2px;padding:0 .06em;transition:background .3s}
+body[data-hl="off"] .hl{background-image:none}
+body[data-hl="only"] .s:not(.is-hl){opacity:.22;filter:saturate(.4)}
+.s{transition:opacity .35s,filter .35s}
+
+/* dual mode */
+body[data-mode="both"] .pair{display:grid;grid-template-columns:1fr 1fr;gap:2rem;
+  padding:.35rem 0;border-bottom:1px dashed var(--rule)}
+body[data-mode="both"] article{max-width:none}
+body[data-mode="both"] .para{display:contents}
+body[data-mode="both"] .hl{background-image:none}
+body[data-mode="both"] .pair.is-hl{position:relative;background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
+body[data-mode="both"] .pair.is-hl::before{content:"";position:absolute;left:-.85rem;top:.45rem;bottom:.45rem;
+  width:3px;border-radius:2px;background:var(--gold)}
+@media(max-width:760px){body[data-mode="both"] .pair{grid-template-columns:1fr;gap:.35rem}}
+body[data-mode="mr"] .en-block,body[data-mode="en"] .mr-block{display:none}
+
+/* tap any sentence -> gloss strip */
+body[data-mode="mr"] .pair,body[data-mode="en"] .pair{cursor:pointer}
+.en-inline{display:none}
+.pair.active{background:var(--accent-soft);border-radius:3px;box-shadow:0 0 0 .25em var(--accent-soft)}
+.gloss{position:fixed;left:50%;transform:translate(-50%,140%);bottom:4.5rem;z-index:25;width:min(38rem,calc(100vw - 2.5rem));
+  background:var(--paper-2);border:1px solid var(--rule);border-radius:14px;padding:1rem 1.15rem;
+  box-shadow:var(--shadow);transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .25s;opacity:0}
+.gloss.show{transform:translate(-50%,0);opacity:1}
+.gloss .lbl{font-family:'Inter',sans-serif;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:.4rem;display:flex;justify-content:space-between}
+.gloss .lbl b{cursor:pointer;color:var(--ink-soft);font-weight:400}
+.gloss p{margin:0;font-size:.95rem;line-height:1.6}
+
+/* footnote */
+.footnote{margin-top:3rem;padding-top:1.25rem;border-top:1px solid var(--rule);
+  font-size:.86rem;color:var(--ink-soft)}
+.footnote .num{color:var(--accent);font-weight:600;margin-right:.4rem}
+
+/* ---------- essence rail ---------- */
+aside{position:sticky;top:5.5rem}
+.card{background:var(--paper-2);border:1px solid var(--rule);border-radius:14px;padding:1.15rem 1.25rem;
+  box-shadow:var(--shadow)}
+.card h2{font-family:'Inter',sans-serif;font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 .9rem;font-weight:600}
+.pt{display:flex;gap:.65rem;padding:.55rem 0;border-bottom:1px solid var(--rule);cursor:pointer;transition:.2s}
+.pt:last-child{border-bottom:0}
+.pt:hover{color:var(--accent)}
+.pt .dot{width:5px;height:5px;border-radius:50%;background:var(--gold);margin-top:.62em;flex:none}
+.pt .txt{font-size:.83rem;line-height:1.55}
+.pt .txt b{display:block;font-family:'Tiro Devanagari Marathi',serif;font-weight:400;font-size:.95rem;margin-bottom:.1rem}
+.flash{animation:flash 1.6s ease}
+@keyframes flash{0%,100%{background-color:transparent}25%{background-color:var(--accent-soft)}}
+
+.practice{margin-top:1rem;background:transparent;border:1px dashed var(--rule)}
+.practice p{margin:0;font-size:.83rem;color:var(--ink-soft);font-style:italic}
+.jap{display:flex;align-items:center;gap:.7rem;margin-top:.85rem}
+.jap button{flex:1;font-family:'Inter',sans-serif;font-size:.75rem;font-weight:500;padding:.5rem;border-radius:8px;
+  border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+.jap button:hover{background:var(--accent);color:var(--paper)}
+.count{font-family:'Inter',sans-serif;font-variant-numeric:tabular-nums;font-size:1.1rem;min-width:2.5rem;text-align:right}
+
+/* ---------- footer nav ---------- */
+.pager{position:fixed;left:50%;transform:translateX(-50%);bottom:1.25rem;z-index:20;
+  display:flex;align-items:center;gap:.4rem;background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:blur(10px);border:1px solid var(--rule);border-radius:999px;padding:.35rem;box-shadow:var(--shadow)}
+.pager span{font-family:'Inter',sans-serif;font-size:.72rem;color:var(--ink-soft);padding:0 .6rem}
+</style>
+</head>
+<body data-mode="mr" data-hl="on">
+<header>
+  <div class="bar">
+    <div class="brand">प्रवचने<small>Daily Reader</small></div>
+    <div class="spacer"></div>
+    <div class="seg ui" role="group" aria-label="Language">
+      <button data-mode="mr" aria-pressed="true">मराठी</button>
+      <button data-mode="en" aria-pressed="false">English</button>
+      <button data-mode="both" aria-pressed="false">Both</button>
+    </div>
+    <div class="seg ui" role="group" aria-label="Highlights">
+      <button data-hl="on" aria-pressed="true">✦ Marks</button>
+      <button data-hl="only" aria-pressed="false">Focus</button>
+      <button data-hl="off" aria-pressed="false">Off</button>
+    </div>
+    <button class="icon ui" id="type" title="Text size">Aa</button>
+    <button class="icon ui" id="theme" title="Theme">◑</button>
+    <div class="progress" id="prog"></div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="dateline ui" id="dateline"></div>
+    <h1 id="title-mr"></h1>
+    <p class="h1-en" id="title-en"></p>
+    <div class="ornament">❧</div>
+    <article id="body"></article>
+    <div class="footnote" id="footnote"></div>
+  </section>
+
+  <aside>
+    <div class="card">
+      <h2>सार · The Essence</h2>
+      <div id="points"></div>
+    </div>
+    <div class="card practice">
+      <h2>Today's practice</h2>
+      <p>“Say it, hear it with your own ears, and forget yourself in it.”</p>
+      <div class="jap">
+        <button id="japBtn">जप · count</button>
+        <div class="count" id="japCount">0</div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<div class="gloss" id="gloss">
+  <div class="lbl">Translation<b id="glossClose">close ✕</b></div>
+  <p id="glossTxt" style="font-family:'Spectral','Tiro Devanagari Marathi',serif"></p>
+</div>
+
+<div class="pager ui">
+  <button class="icon" title="Previous day">‹</button>
+  <span id="pagerLabel">1 of 365</span>
+  <button class="icon" title="Next day">›</button>
+</div>
+
+<script>
+const DATA = {
+  date:{label_mr:"१ जानेवारी", label_en:"1 January"},
+  title_mr:"परमात्मस्वरूपच असणारें नाम",
+  title_en:"The Name That Is Itself the Supreme Reality",
+  footnote:{marker:"१", mr:"ज्याची प्रत्येक कृति रामाच्या स्मरणामध्यें होते तोच रामराज्यांत खरा राहतो.",
+            en:"He whose every act is done in remembrance of Rama is the one who truly dwells in Rama's kingdom."},
+  paras:[[1,10],[11,15],[16,19],[20,23]],
+  sentences:[
+ [1,"नाम म्हणजे भगवंताचें नांव.","“Nama” means the Name of God.",0],
+ [2,"देवाच्या कोणत्याहि नांवांत फरक नाहीं.","There is no difference between any of God’s names.",0],
+ [3,"नाम हा जीव आणि शिव यांमधील दुवा आहे.","The Name is the link between the individual soul and God.",1],
+ [4,"नाम हें साध्य आहे व साधनहि आहे.","The Name is both the goal and the means to it.",1],
+ [5,"नाम सगुण आहे आणि निर्गुणहि आहे.","The Name is saguna — with form and attributes — and also nirguna, the formless.",1],
+ [6,"नामाचा आरंभ सगुणांत आहे व शेवट निर्गुणांत आहे.","The Name begins in the saguna and ends in the nirguna.",1],
+ [7,"आरंभ सगुणांत आहे असें म्हणण्याचें कारण हें कीं, भगवंत मुळांत जो निराकार, निर्गुण आहे, तो जेव्हां सगुणांत आला तेव्हांच त्याला नाम-रूप लागलें;","It is said to begin in the saguna because God, originally formless and without attributes, acquired name and form only when He assumed a manifest form;",1],
+ [8,"व सगुणरूप नाहींसें झालें तरी नाम शिल्लकच राहिलें, म्हणून तें निर्गुणहि आहे.","and even when that form dissolves, the Name remains — which is why it is nirguna as well.",1],
+ [9,"तेव्हां सगुण किंवा निर्गुण भक्तीला नामाचाच आधार आहे.","So whether devotion is to the formed or the formless, its support is the Name alone.",0],
+ [10,"नाम हा सत्संगाचा पाया आहे व कळसहि आहे.","The Name is both the foundation of satsang and its crowning pinnacle.",0],
+ [11,"नाम म्हणजे आपली वृत्ति आणि भगवंत यांना जोडणारी सांखळीच आहे.","The Name is the very chain that joins our inner disposition to God.",1],
+ [12,"लग्न झाल्यावर स्त्री जशी नवऱ्याशीं एकरूप होऊन जाते, त्याप्रमाणें वृत्तीचें नामाशीं लग्न होऊन ती नामरूप बनली पाहिजे.","Just as a wife becomes one with her husband after marriage, our disposition must be wedded to the Name until it takes the Name’s own form.",1],
+ [13,"अन्नाला स्वतःची चव असते; त्याच्यामध्यें आपण आपली गोडी व आवड घालून नंतर तें आपण खातों.","Food has a taste of its own; we add our own relish and liking to it and then eat it.",1],
+ [14,"पण नामाला स्वतःची अशी चव नाहीं. त्याच्यामध्यें आपणच आपली गोडी घालून तें घेतलें पाहिजे.","But the Name has no such taste of its own. We ourselves must put our sweetness into it and then take it.",0],
+ [15,"आपण जितकी जास्त गोडी त्यामध्यें घालूं तितकें तें अधिक गोड वाटेल.","The more sweetness we pour into it, the sweeter it will taste.",0],
+ [16,"पंढरपूरला जाण्यास पुष्कळ रस्ते आहेत; परंतु सर्वांना शेवटीं “बारींतून” जाऊनच देवदर्शन घ्यावें लागतें.","There are many roads to Pandharpur; but in the end everyone must pass through the same narrow queue to have darshan of God.",0],
+ [17,"त्याप्रमाणें, इतर साधनें जरी केलीं तरी नामसाधन केल्यावरच आत्मस्वरूपाची प्राप्ति होते.","In the same way, whatever other practices one may follow, realisation of one’s true Self comes only through the practice of the Name.",1],
+ [18,"आपण नाम घ्यावें, तें आपणच आपल्या कानांनीं ऐकावें, आणि तें घेतां घेतां त्यांत शेवटीं स्वतःला विसरून जावें, हाच नामसाधनेंतील आनंदाचा मार्ग आहे.","Take the Name, hear it with your own ears, and while taking it, at last forget yourself in it — this is the path of joy in the practice of the Name.",1],
+ [19,"जसें आपलें आपलेपण आपल्या नांवांत आहे, तसें देवाचें देवपण त्याच्या नामांत आहे.","Just as our own selfhood lives in our name, so God’s godhood lives in His Name.",1],
+ [20,"आपण आज जें नाम घेतों तेंच नाम कायम राहतें; परंतु आपली देहबुद्धि जसजशी कमी होईल तसतसें तें नाम व्यापक व अर्थगर्भ बनत जातें, आणि शेवटीं नाम हें परमात्मस्वरूपच आहे असा अनुभव येतो.","The Name we take today stays the same; but as body-consciousness thins, that Name grows vaster and more laden with meaning, until at last one experiences that the Name is itself the Supreme Reality.",0],
+ [21,"पाणी हें जसें शरीराचें जीवन आहे, तसें नाम हें मनाचें “जीवन” बनलें पाहिजे.","As water is the life of the body, so must the Name become the “life” of the mind.",1],
+ [22,"अंतकाळीं अगदीं शेवटीं सुटणारी वस्तु म्हणजे भगवंताचें नाम पाहिजे. नामांत शेवटचा श्वास गेला पाहिजे.","At the end of life, the very last thing to leave us should be God’s Name. The final breath should go out in the Name.",1],
+ [23,"नामांत एका आनंदाशिवाय दुसरें कांहीं नाहीं.","In the Name there is nothing but bliss.",0]
+  ],
+  points:[
+   ["नाम = साध्य + साधन","Both the road and the destination — nothing further is needed.",4],
+   ["जीव–शिव दुवा","The link between soul and God; the chain that binds your disposition to Him.",3],
+   ["सगुण ते निर्गुण","Arises with form, survives when form dissolves — so it serves every devotion.",6],
+   ["गोडी आपणच घालायची","The Name has no taste of its own; what you put in is what you taste.",13],
+   ["“बारीं”शिवाय दर्शन नाही","Many roads, one gate — realisation comes through the Name.",17],
+   ["घ्या · ऐका · विसरा","Say it, hear it yourself, lose yourself in it.",18],
+   ["मनाचें जीवन","As water is the life of the body, the Name is the life of the mind.",21],
+   ["शेवटचा श्वास नामांत","Let the Name be the last thing to leave you.",22]
+  ]
+};
+
+/* ---- render ---- */
+const esc = s => s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+document.getElementById('dateline').textContent = DATA.date.label_mr + '  ·  ' + DATA.date.label_en;
+document.getElementById('title-mr').textContent = DATA.title_mr;
+document.getElementById('title-en').textContent = DATA.title_en;
+document.getElementById('footnote').innerHTML =
+  `<span class="num">${DATA.footnote.marker}.</span><span class="mr-block mr">${esc(DATA.footnote.mr)}</span>
+   <span class="en-block en"><em>${esc(DATA.footnote.en)}</em></span>`;
+
+const body = document.getElementById('body');
+body.innerHTML = DATA.paras.map(([a,b])=>{
+  const rows = DATA.sentences.filter(s=>s[0]>=a&&s[0]<=b).map(([n,mr,en,hl])=>`
+    <span class="pair s ${hl?'is-hl':''}" data-n="${n}">
+      <span class="mr-block mr ${hl?'hl':''}">${esc(mr)} </span><span class="en-inline">${esc(en)}</span><span class="en-block en ${hl?'hl':''}">${esc(en)} </span>
+    </span>`).join('');
+  return `<p class="para">${rows}</p>`;
+}).join('');
+
+document.getElementById('points').innerHTML = DATA.points.map(([mr,en,n])=>
+  `<div class="pt" data-goto="${n}"><span class="dot"></span><span class="txt"><b>${esc(mr)}</b>${esc(en)}</span></div>`).join('');
+
+/* ---- interactions ---- */
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
+  const key = b.dataset.mode ? 'mode' : 'hl';
+  document.body.dataset[key] = b.dataset[key==='mode'?'mode':'hl'];
+  b.parentElement.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b));
+  if(key==='mode') closeGloss();
+}));
+
+const gloss=document.getElementById('gloss'), glossTxt=document.getElementById('glossTxt');
+function closeGloss(){gloss.classList.remove('show');
+  document.querySelectorAll('.pair.active').forEach(x=>x.classList.remove('active'));}
+body.addEventListener('click', e=>{
+  const p = e.target.closest('.pair');
+  if(!p || document.body.dataset.mode==='both') return;
+  if(p.classList.contains('active')) return closeGloss();
+  closeGloss(); p.classList.add('active');
+  const s = DATA.sentences.find(x=>x[0]==p.dataset.n);
+  glossTxt.textContent = document.body.dataset.mode==='en' ? s[1] : s[2];
+  gloss.classList.add('show');
+});
+document.getElementById('glossClose').onclick=closeGloss;
+
+document.getElementById('points').addEventListener('click', e=>{
+  const pt = e.target.closest('.pt'); if(!pt) return;
+  const t = body.querySelector(`.pair[data-n="${pt.dataset.goto}"]`);
+  t.scrollIntoView({behavior:'smooth',block:'center'});
+  t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash');
+});
+
+const themes=['day','sepia','night']; let ti=0;
+document.getElementById('theme').onclick=()=>{ti=(ti+1)%3;document.documentElement.dataset.theme=themes[ti];};
+const sizes=[19,21,23,17]; let si=0;
+document.getElementById('type').onclick=()=>{si=(si+1)%sizes.length;document.body.style.setProperty('--fs',sizes[si]+'px');};
+
+let jap=0; const jc=document.getElementById('japCount');
+document.getElementById('japBtn').onclick=()=>{jc.textContent=++jap; jc.style.color='var(--accent)';
+  setTimeout(()=>jc.style.color='',180);};
+
+/* deep links: ?mode=mr|en|both&hl=on|only|off&theme=day|sepia|night */
+(function(){
+  const q=new URLSearchParams(location.search);
+  ['mode','hl'].forEach(k=>{ const v=q.get(k); if(!v) return;
+    const b=document.querySelector(`.seg button[data-${k}="${v}"]`); if(b) b.click(); });
+  const t=q.get('theme'); if(t && themes.includes(t)){ ti=themes.indexOf(t); document.documentElement.dataset.theme=t; }
+})();
+
+const prog=document.getElementById('prog');
+addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-innerHeight;
+  prog.style.width=(h>0?scrollY/h*100:0)+'%';
+});
+</script>
+</body>
+</html>

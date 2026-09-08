@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>सार-पान · the short page — 1 January</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="day"]{
+  --desk:#e7e0d0;--paper:#fbf8f1;--bd:#e6dcc8;--ink:#26221c;--soft:#6f665a;--faint:#a4998a;
+  --rule:#e0d6c2;--gold:#b8892f;--ember:#9c5527;--wash:#f7edd9;--chip:#fdfbf6;--chip-bd:#ded3c0;
+  --on-fg:#fffdf8;--shadow:0 2px 4px rgba(70,55,30,.05),0 24px 60px -24px rgba(70,55,30,.28)}
+[data-theme="sepia"]{--desk:#ddceae;--paper:#f4e9d2;--bd:#dccdae;--rule:#d7c6a4;--chip:#f8efdc;--chip-bd:#d7c6a4}
+[data-theme="night"]{
+  --desk:#0b0a08;--paper:#15130f;--bd:#2a241d;--ink:#e9e1d3;--soft:#9a9082;--faint:#6a6154;
+  --rule:#2c261f;--gold:#d2a058;--ember:#c07a44;--wash:#2c2114;--chip:#1b1712;--chip-bd:#2f2820;
+  --on-fg:#17130e;--shadow:0 30px 70px -26px rgba(0,0,0,.8)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:'EB Garamond',Georgia,serif;
+  font-size:18px;-webkit-font-smoothing:antialiased;padding:0 1.25rem 4rem;transition:background .4s,color .4s}
+.ui{font-family:'Inter',system-ui,sans-serif}
+button{font-family:'Inter',system-ui,sans-serif;cursor:pointer}
+
+.bar{max-width:44rem;margin:0 auto;padding:.75rem 0;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.brand{font-family:'Tiro Devanagari Marathi',serif;font-size:1rem;line-height:1.1}
+.brand small{display:block;font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--faint)}
+.grow{flex:1}
+.btn{font-size:.7rem;font-weight:500;color:var(--soft);background:var(--chip);border:1px solid var(--chip-bd);
+  border-radius:999px;padding:.36rem .7rem;transition:.18s;text-decoration:none;display:inline-block}
+.btn:hover{border-color:var(--gold);color:var(--gold)}
+.btn.on{background:var(--gold);border-color:var(--gold);color:var(--on-fg)}
+
+.card{max-width:44rem;margin:.5rem auto 0;background:var(--paper);border:1px solid var(--bd);
+  border-radius:3px;box-shadow:var(--shadow);padding:2.6rem 2.6rem 2rem;transition:background .4s}
+.dl{font-family:'Inter',sans-serif;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1rem}
+h1{font-family:'Tiro Devanagari Marathi',serif;font-weight:400;font-size:1.7rem;line-height:1.4;margin:0 0 .2rem}
+.sub{font-style:italic;color:var(--soft);margin:0 0 1.4rem;font-size:.95rem}
+
+/* whose abridgement this is — stated before the abridgement, not after */
+.whose{border-left:2px solid var(--gold);padding:.15rem 0 .15rem .8rem;margin:0 0 1.8rem}
+.whose b{display:block;font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:.3rem;font-weight:600}
+.whose span{font-size:.85rem;line-height:1.55;color:var(--soft);font-style:italic}
+
+/* the passages, in the order they appear in the discourse */
+.p{padding:.9rem 0;border-bottom:1px solid var(--rule)}
+.p:last-of-type{border-bottom:0}
+.p .mr{font-family:'Tiro Devanagari Marathi',serif;font-size:1.06rem;line-height:2;display:block}
+.p .en{display:block;margin-top:.4rem;font-size:.9rem;line-height:1.55;color:var(--soft);font-style:italic}
+body[data-en="off"] .p .en{display:none}
+.p .ref{font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.12em;color:var(--faint);
+  float:right;margin-left:.8rem}
+
+/* today — every item quotes the discourse, nothing is invented */
+.today{margin-top:2.2rem;padding-top:1.4rem;border-top:2px solid var(--ember)}
+.today .h{font-family:'Inter',sans-serif;font-size:.57rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ember);display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem}
+.today h2{font-family:'Tiro Devanagari Marathi',serif;font-weight:400;font-size:1.25rem;margin:0 0 .3rem}
+.today .note{font-size:.82rem;line-height:1.55;color:var(--soft);font-style:italic;margin:0 0 1.3rem}
+.today .status{display:inline-block;margin-bottom:1.3rem;font-family:'Inter',sans-serif;font-size:.6rem;
+  line-height:1.45;color:var(--ember);border:1px solid var(--ember);border-radius:3px;
+  padding:.25rem .45rem;opacity:.85}
+.act{display:grid;grid-template-columns:1.6rem 1fr;gap:.2rem .8rem;padding:.75rem 0;
+  border-bottom:1px solid var(--rule)}
+.act:last-child{border-bottom:0}
+.act .n{font-family:'Inter',sans-serif;font-size:.62rem;color:var(--gold);font-weight:600;padding-top:.45em}
+.act q{grid-column:2;font-family:'Tiro Devanagari Marathi',serif;font-size:.95rem;line-height:1.85;
+  quotes:none;display:block;color:var(--ink)}
+.act .do{grid-column:2;margin-top:.35rem;font-size:.92rem;line-height:1.55;color:var(--soft)}
+.act .do b{font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ember);margin-right:.45rem;font-weight:600}
+.act .src{grid-column:2;margin-top:.3rem;font-family:'Inter',sans-serif;font-size:.58rem;
+  letter-spacing:.08em;color:var(--faint)}
+
+.foot{max-width:44rem;margin:1rem auto 0;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;
+  font-family:'Inter',sans-serif;font-size:.65rem;color:var(--faint)}
+@media(max-width:640px){.card{padding:1.8rem 1.3rem 1.5rem}}
+@media print{
+  [data-theme]{--desk:#fff;--paper:#fff;--bd:#fff;--ink:#1b1813;--soft:#4f483e;--rule:#d6cbb6;
+    --gold:#8a6620;--ember:#8a4a20;--shadow:none}
+  body{background:#fff;padding:0;font-size:11pt}
+  .bar,.foot{display:none}
+  .card{box-shadow:none;border:0;max-width:none;padding:0}
+}
+</style>
+</head>
+<body data-en="on">
+
+<div class="bar ui">
+  <div class="brand">सार-पान<small>the short page</small></div>
+  <span class="grow"></span>
+  <button class="btn on" id="bEn">English</button>
+  <button class="btn" id="bTheme">◑</button>
+  <button class="btn" id="bPrint">Print</button>
+  <a class="btn" href="design-e-page.html">पूर्ण प्रवचन →</a>
+</div>
+
+<div class="card">
+  <div class="dl ui" id="dl"></div>
+  <h1 id="tmr"></h1>
+  <p class="sub" id="ten"></p>
+
+  <div class="whose">
+    <b>एका वाचकाची निवड · one reader's selection</b>
+    <span id="whose"></span>
+  </div>
+
+  <div id="passages"></div>
+
+  <section class="today">
+    <div class="h ui"><span>आज हें कसें करावें · carrying it today</span><span id="actN"></span></div>
+    <h2>साधना</h2>
+    <p class="note">Every line below is <b>quoted from this discourse</b>. Only the short
+    “today” line under each quote is written for this edition — and it is deliberately small,
+    because the instruction is already in the text.</p>
+    <span class="status ui">Draft · unattributed · not reviewed by a Marathi scholar or by the publisher</span>
+    <div id="acts"></div>
+  </section>
+</div>
+
+<div class="foot ui">
+  <span>Abridged from the full discourse — <a class="btn" href="design-e-page.html">read all 23 sentences</a></span>
+</div>
+
+<script>
+const DATA = {"id": "01-01", "date": {"day": 1, "month": 1, "label_mr": "१ जानेवारी", "label_en": "1 January"}, "title_mr": "परमात्मस्वरूपच असणारें नाम", "title_en": "The Name That Is Itself the Supreme Reality", "footnote": {"marker": "१", "mr": "ज्याची प्रत्येक कृति रामाच्या स्मरणामध्यें होते तोच रामराज्यांत खरा राहतो.", "en": "He whose every act is done in remembrance of Rama is the one who truly dwells in Rama's kingdom."}, "paras": [[1, 10], [11, 15], [16, 19], [20, 23]], "sentences": [[1, "नाम म्हणजे भगवंताचें नांव.", "\"Nama\" means the Name of God.", 0], [2, "देवाच्या कोणत्याहि नांवांत फरक नाहीं.", "There is no difference between any of God's names.", 0], [3, "नाम हा जीव आणि शिव यांमधील दुवा आहे.", "The Name is the link between the individual soul (jiva) and God (Shiva).", 1], [4, "नाम हें साध्य आहे व साधनहि आहे.", "The Name is both the goal and the means to it.", 1], [5, "नाम सगुण आहे आणि निर्गुणहि आहे.", "The Name is saguna (God with form and attributes) and also nirguna (formless, attributeless).", 1], [6, "नामाचा आरंभ सगुणांत आहे व शेवट निर्गुणांत आहे.", "The Name begins in the saguna and ends in the nirguna.", 1], [7, "आरंभ सगुणांत आहे असें म्हणण्याचें कारण हें कीं, भगवंत मुळांत जो निराकार, निर्गुण आहे, तो जेव्हां सगुणांत आला तेव्हांच त्याला नाम-रूप लागलें;", "It is said to begin in the saguna because God, who is originally formless and without attributes, acquired name and form only when He assumed a manifest form;", 1], [8, "व सगुणरूप नाहींसें झालें तरी नाम शिल्लकच राहिलें, म्हणून तें निर्गुणहि आहे.", "and even when that form dissolves, the Name remains — which is why it is nirguna as well.", 1], [9, "तेव्हां सगुण किंवा निर्गुण भक्तीला नामाचाच आधार आहे.", "So whether devotion is to the formed or the formless, its support is the Name alone.", 0], [10, "नाम हा सत्संगाचा पाया आहे व कळसहि आहे.", "The Name is both the foundation of satsang and its crowning pinnacle.", 0], [11, "नाम म्हणजे आपली वृत्ति आणि भगवंत यांना जोडणारी सांखळीच आहे.", "The Name is the very chain that joins our inner disposition to God.", 1], [12, "लग्न झाल्यावर स्त्री जशी नवऱ्याशीं एकरूप होऊन जाते, त्याप्रमाणें वृत्तीचें नामाशीं लग्न होऊन ती नामरूप बनली पाहिजे.", "Just as a wife becomes one with her husband after marriage, our disposition must be wedded to the Name until it takes the Name's own form.", 1], [13, "अन्नाला स्वतःची चव असते; त्याच्यामध्यें आपण आपली गोडी व आवड घालून नंतर तें आपण खातों.", "Food has a taste of its own; we add our own relish and liking to it and then eat it.", 1], [14, "पण नामाला स्वतःची अशी चव नाहीं. त्याच्यामध्यें आपणच आपली गोडी घालून तें घेतलें पाहिजे.", "But the Name has no such taste of its own. We ourselves must put our sweetness into it and then take it.", 0], [15, "आपण जितकी जास्त गोडी त्यामध्यें घालूं तितकें तें अधिक गोड वाटेल.", "The more sweetness we pour into it, the sweeter it will taste.", 0], [16, "पंढरपूरला जाण्यास पुष्कळ रस्ते आहेत; परंतु सर्वांना शेवटीं “बारींतून” जाऊनच देवदर्शन घ्यावें लागतें.", "There are many roads to Pandharpur; but in the end everyone must pass through the same narrow queue to have darshan of God.", 0], [17, "त्याप्रमाणें, इतर साधनें जरी केलीं तरी नामसाधन केल्यावरच आत्मस्वरूपाची प्राप्ति होते.", "In the same way, whatever other practices one may follow, realisation of one's true Self comes only through the practice of the Name.", 1], [18, "आपण नाम घ्यावें, तें आपणच आपल्या कानांनीं ऐकावें, आणि तें घेतां घेतां त्यांत शेवटीं स्वतःला विसरून जावें, हाच नामसाधनेंतील आनंदाचा मार्ग आहे.", "Take the Name, hear it with your own ears, and while taking it, at last forget yourself in it — this is the path of joy in the practice of the Name.", 1], [19, "जसें आपलें आपलेपण आपल्या नांवांत आहे, तसें देवाचें देवपण त्याच्या नामांत आहे.", "Just as our own selfhood lives in our name, so God's godhood lives in His Name.", 1], [20, "आपण आज जें नाम घेतों तेंच नाम कायम राहतें; परंतु आपली देहबुद्धि जसजशी कमी होईल तसतसें तें नाम व्यापक व अर्थगर्भ बनत जातें, आणि शेवटीं नाम हें परमात्मस्वरूपच आहे असा अनुभव येतो.", "The Name we take today stays the same; but as body-consciousness thins, that Name grows vaster and more laden with meaning, until at last one experiences that the Name is itself the Supreme Reality.", 0], [21, "पाणी हें जसें शरीराचें जीवन आहे, तसें नाम हें मनाचें “जीवन” बनलें पाहिजे.", "As water is the life of the body, so must the Name become the “life” of the mind.", 1], [22, "अंतकाळीं अगदीं शेवटीं सुटणारी वस्तु म्हणजे भगवंताचें नाम पाहिजे. नामांत शेवटचा श्वास गेला पाहिजे.", "At the end of life, the very last thing to leave us should be God's Name. The final breath should go out in the Name.", 1], [23, "नामांत एका आनंदाशिवाय दुसरें कांहीं नाहीं.", "In the Name there is nothing but bliss.", 0]], "groups": {"5": 1, "6": 1, "7": 2, "8": 2, "11": 3, "12": 3}, "points": [["नाम = साध्य + साधन", "The Name is both the goal and the means — nothing further is needed beyond it.", 4], ["जीव–शिव दुवा", "The Name is the link between the soul and God; it is the chain that binds our disposition to Him.", 3], ["सगुण ते निर्गुण", "The Name starts with form and ends in the formless — it outlives form itself, so it serves every kind of devotion.", 6], ["गोडी आपणच घालायची", "The Name has no taste of its own; the sweetness you put in is the sweetness you get out.", 13], ["“बारीं” शिवाय दर्शन नाही", "Many roads, one final gate: other practices may help, but Self-realisation comes only through the Name.", 17], ["घ्या, ऐका, विसरा", "The method in one line — say the Name, hear it yourself, and lose yourself in it.", 18], ["मनाचें जीवन", "Make the Name the life of the mind, as water is the life of the body.", 21], ["शेवटचा श्वास नामांत", "Let the Name be the last thing to leave you — the final breath should go out in it.", 22]]};
+</script>
+<script>
+const SUMMARY = {"id": "01-01", "status": {"state": "draft", "author": null, "reviewed_by_marathi_editor": false, "reviewed_by_publisher": false, "note": "Marathi connective prose is machine-drafted and needs a native editor. English is a draft."}, "essay": [{"lead": true, "mr": "<span class=\"mr\">नाम</span> म्हणजे भगवंतापर्यंत पोंचण्याचें केवळ साधन नव्हे. <strong>नाम हा जीव आणि शिव यांमधील दुवा आहे</strong>{{3}} — या एका वाक्यानें पुढचें सगळें बदलून जातें.", "en": "<span class=\"mr\">नाम</span> — the Name — is not a technique for reaching God. <strong>It is the link itself</strong>{{3}}. That one claim rearranges everything that follows."}, {"mr": "दुवाच जर नाम आहे, तर तें वाटेवरचें कांहीं नाहीं. <strong>नाम हें साध्य आहे व साधनहि आहे</strong>{{4}}. म्हणून पुढें पोंचण्यासारखें दुसरें कांहीं उरत नाहीं.", "en": "If the Name is the bridge between you and God, it is not something you do on the way to somewhere else. It is <strong>both the goal and the means</strong>{{4}} — <span class=\"mr\">साध्य आणि साधन</span> — at once. There is nothing further to arrive at."}, {"mr": "रूप डोळ्यांपुढें आणतां आलें पाहिजे, असेंहि नाहीं. निराकार सगुणांत आला तेव्हां त्याला नाम-रूप लागलें; <strong>सगुणरूप नाहींसें झालें तरी नाम शिल्लकच राहिलें</strong>{{7}}. म्हणून सगुण भक्तालाहि आणि निर्गुण भक्तालाहि आधार तोच. आणि हा दुवा नव्यानें बांधावा लागत नाहीं — <strong>नाम ही आपली वृत्ति आणि भगवंत यांना जोडणारी सांखळीच आहे</strong>{{11}}; ती आपण उचललेली नसते, एवढेंच.", "en": "Nor does it depend on your being able to picture anything. The Name arose when the formless took form; when the form dissolved, <strong>the Name remained</strong>{{7}}. So it holds for the devotee who needs an image and equally for the one who needs none. And it is not a rope you must throw across a gap — it is <strong>a chain already joining you to Him</strong>{{11}}, which you have simply not picked up."}, {"mr": "इथेंच बहुतेकजण थांबतात — आधीं कांहीं वाटलें पाहिजे, अशी वाट पाहत. हें पान तें कारण अगदीं साध्या उदाहरणानें काढून टाकतें.", "en": "Here is where most of us stop: waiting to feel something first. This page removes that excuse with an entirely ordinary comparison."}, {"pull": 13}, {"mr": "अन्नाला स्वतःची चव असते; आपण आपली गोडी घालून मग तें खातों. <strong>नामाला स्वतःची अशी चव नाहीं</strong>{{13}}. त्यांतली गोडी आपणच घातलेली असते — आणि जितकी घालूं तितकी ती वाढते. म्हणून जी ओढ आपण वाट पाहत होतों, ती आधीं येणारी नव्हतीच. ती नंतर येते.", "en": "Food arrives with a taste of its own; you bring your liking to it and then you eat. The Name has <strong>no taste of its own</strong>{{13}}. The sweetness in it is the sweetness you put there — and it grows sweeter exactly in proportion to what you bring. So the feeling you were waiting for was never going to arrive first. It arrives second."}, {"mr": "कृति तीन शब्दांची आहे. <strong>नाम घ्यावें, तें आपणच आपल्या कानांनीं ऐकावें, आणि तें घेतां घेतां त्यांत स्वतःला विसरून जावें</strong>{{18}}. एवढेंच सांगितलें आहे — आणि इथें कान मागितले आहेत, एकाग्रता नव्हे. तें आपल्याला ऐकूं येईल इतकें असावें.", "en": "The method is three words long. <strong>Say it. Hear it with your own ears. Go on until you forget yourself in it.</strong>{{18}} That is the whole instruction — and note that it asks for your ears, not your concentration. It is meant to be audible to you."}, {"mr": "असें पुष्कळ वेळां घडलें कीं तें करण्याची क्रिया राहत नाहीं. <strong>पाणी जसें शरीराचें जीवन, तसें नाम मनाचें जीवन बनलें पाहिजे</strong>{{21}} — सकाळीं करावयाची गोष्ट नव्हे; ज्यांत राहावयाचें तें.", "en": "Do that often enough and it stops being an activity you perform. Water is the life of the body; <strong>the Name is to become the life of the mind</strong>{{21}}. Not something done in the morning. Something lived in."}, {"mr": "आणि शेवटीं तें कठीण पण स्पष्ट वाक्य — जें जें सुटत जातें त्यांत <strong>अगदीं शेवटीं सुटणारी वस्तु म्हणजे भगवंताचें नाम पाहिजे</strong>{{22}}.", "en": "And then the plain, difficult ending the page builds toward: of everything that falls away at the end, <strong>let this be the last to go</strong>{{22}}."}, {"mr": "म्हणून सुरुवात कधीं करावी, हा प्रश्नच उरत नाहीं. शेवटचा श्वास नामांत जावयाचा असेल, तर आजचा प्रत्येक जप त्याचीच तयारी आहे. नंतर सुरू होणारी अशी ही साधना नाहीं.", "en": "Which settles the question of when to begin. If the last breath is to go out in the Name, then every repetition made today is the rehearsal for it. There is no version of this practice that starts later."}], "begin_today": {"heading_mr": "आजची सुरुवात", "heading_en": "begin today", "steps": [{"word": "घ्या", "mr": "नाम घ्यावें — एकदां, हळू आवाजांत.", "en": "Say the Name — once, aloud and quietly."}, {"word": "ऐका", "mr": "तें आपल्याच कानांनीं ऐकावें.", "en": "Hear it in your own ears. Audible to you."}, {"word": "विसरा", "mr": "घेतां घेतां त्यांत स्वतःला विसरून जावें.", "en": "Stay with it until you forget yourself in it."}], "close_mr": "तयारी कांहीं नाहीं, शिकावें कांहीं नाहीं, ठराविक जागाहि नाहीं. गोडी आपण घालायची; चव मागून येते.", "close_en": "Nothing to prepare, nothing to learn, no place you must be. You supply the liking; the sweetness follows."}, "practice_actions": [{"sentence": 18, "today": "Say it once aloud, quietly, so that your own ears hear it. Not silently — audibly enough to be heard by you."}, {"sentence": 13, "today": "Do not wait to feel anything. Bring the liking with you; the sweetness is what you put in, not what you find."}, {"sentence": 12, "today": "Take it into ordinary work — walking, cooking, waiting — not only into the time you set aside."}, {"sentence": 17, "today": "Keep whatever else you already do. Add this; do not exchange it for this."}, {"sentence": 21, "today": "Return to it as often as you drink water today. Frequency, not duration."}, {"sentence": 22, "today": "Let it be the last thing before sleep, as a rehearsal of the last thing before the end."}, {"sentence": "fn", "today": "Choose one ordinary task today and do that one task in remembrance."}]};
+</script>
+<script>
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const dev=n=>String(n).replace(/\d/g,d=>'०१२३४५६७८९'[d]);
+const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},
+             set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* the same grouping the full edition uses */
+const GROUP=Object.fromEntries(Object.entries(DATA.groups||{}).map(([k,v])=>[+k,v]));
+const units=[];
+DATA.sentences.forEach(([n,mr,en,hl])=>{
+  const g=GROUP[n],l=units[units.length-1];
+  if(g&&l&&l.g===g){l.ns.push(n);l.mr+=' '+mr;l.en+=' '+en} else units.push({g,ns:[n],mr,en,hl});
+});
+const marked=units.filter(u=>u.hl);
+
+document.getElementById('dl').textContent=DATA.date.label_mr+'  ·  '+DATA.date.label_en;
+document.getElementById('tmr').textContent=DATA.title_mr;
+document.getElementById('ten').textContent=DATA.title_en;
+document.getElementById('whose').innerHTML=
+  `This short page is <b>not an editorial abridgement</b>. It is the ${dev(marked.length)}
+   passages that <b>one previous reader underlined by hand</b> in a copy of this book,
+   set in the order they appear. Their choices, not the author's emphasis and not ours.
+   The discourse runs to ${dev(DATA.sentences.length)} sentences; this is ${marked.length} of them.`;
+
+document.getElementById('passages').innerHTML=marked.map(u=>
+  `<div class="p"><span class="ref ui">${u.ns.map(dev).join('–')}</span>
+     <span class="mr">${esc(u.mr)}</span><span class="en">${esc(u.en)}</span></div>`).join('');
+
+/* Each action quotes a sentence of the discourse by number; the "today" line is the only
+   authored part, and it restates the quote in practical terms rather than adding doctrine. */
+const ACTS=SUMMARY.practice_actions.map(a=>({n:a.sentence,today:a.today}));
+const byN={}; DATA.sentences.forEach(([n,mr,en])=>byN[n]={mr,en});
+byN['fn']={mr:DATA.footnote.mr,en:DATA.footnote.en};
+document.getElementById('actN').textContent=ACTS.length+' · all quoted';
+document.getElementById('acts').innerHTML=ACTS.map((a,i)=>{
+  const s=byN[a.n];
+  const ref = a.n==='fn' ? 'तळटीप · footnote' : 'वाक्य '+dev(a.n)+' · sentence '+a.n;
+  return `<div class="act"><span class="n">${dev(i+1)}</span>
+    <q>${esc(s.mr)}</q>
+    <div class="do"><b>आज · today</b>${esc(a.today)}</div>
+    <div class="src">${ref}</div></div>`;
+}).join('');
+
+const THEMES=['day','sepia','night'];
+function setTheme(t){document.documentElement.dataset.theme=t;store.set('pravachane-theme',t)}
+setTheme(store.get('pravachane-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'night':'day'));
+document.getElementById('bTheme').onclick=()=>
+  setTheme(THEMES[(THEMES.indexOf(document.documentElement.dataset.theme)+1)%3]);
+document.getElementById('bEn').onclick=e=>{
+  const on=document.body.dataset.en==='off';
+  document.body.dataset.en=on?'on':'off'; e.target.classList.toggle('on',on)};
+document.getElementById('bPrint').onclick=()=>print();
+addEventListener('keydown',e=>{if(e.key==='t'||e.key==='T')document.getElementById('bTheme').click()});
+</script>
+</body>
+</html>

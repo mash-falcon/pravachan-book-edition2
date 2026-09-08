@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>सार-पान · the short page — 1 January</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="day"]{
+  --desk:#e7e0d0;--paper:#fbf8f1;--bd:#e6dcc8;--ink:#26221c;--soft:#6f665a;--faint:#a4998a;
+  --rule:#e0d6c2;--gold:#b8892f;--ember:#9c5527;--wash:#f7edd9;--chip:#fdfbf6;--chip-bd:#ded3c0;
+  --on-fg:#fffdf8;--shadow:0 2px 4px rgba(70,55,30,.05),0 24px 60px -24px rgba(70,55,30,.28)}
+[data-theme="sepia"]{--desk:#ddceae;--paper:#f4e9d2;--bd:#dccdae;--rule:#d7c6a4;--chip:#f8efdc;--chip-bd:#d7c6a4}
+[data-theme="night"]{
+  --desk:#0b0a08;--paper:#15130f;--bd:#2a241d;--ink:#e9e1d3;--soft:#9a9082;--faint:#6a6154;
+  --rule:#2c261f;--gold:#d2a058;--ember:#c07a44;--wash:#2c2114;--chip:#1b1712;--chip-bd:#2f2820;
+  --on-fg:#17130e;--shadow:0 30px 70px -26px rgba(0,0,0,.8)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:'EB Garamond',Georgia,serif;
+  font-size:18px;-webkit-font-smoothing:antialiased;padding:0 1.25rem 4rem;transition:background .4s,color .4s}
+.ui{font-family:'Inter',system-ui,sans-serif}
+button{font-family:'Inter',system-ui,sans-serif;cursor:pointer}
+
+.bar{max-width:44rem;margin:0 auto;padding:.75rem 0;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.brand{font-family:'Tiro Devanagari Marathi',serif;font-size:1rem;line-height:1.1}
+.brand small{display:block;font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--faint)}
+.grow{flex:1}
+.btn{font-size:.7rem;font-weight:500;color:var(--soft);background:var(--chip);border:1px solid var(--chip-bd);
+  border-radius:999px;padding:.36rem .7rem;transition:.18s;text-decoration:none;display:inline-block}
+.btn:hover{border-color:var(--gold);color:var(--gold)}
+.btn.on{background:var(--gold);border-color:var(--gold);color:var(--on-fg)}
+
+.card{max-width:44rem;margin:.5rem auto 0;background:var(--paper);border:1px solid var(--bd);
+  border-radius:3px;box-shadow:var(--shadow);padding:2.6rem 2.6rem 2rem;transition:background .4s}
+.dl{font-family:'Inter',sans-serif;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1rem}
+h1{font-family:'Tiro Devanagari Marathi',serif;font-weight:400;font-size:1.7rem;line-height:1.4;margin:0 0 .2rem}
+.sub{font-style:italic;color:var(--soft);margin:0 0 1.4rem;font-size:.95rem}
+
+/* whose abridgement this is — stated before the abridgement, not after */
+.whose{border-left:2px solid var(--gold);padding:.15rem 0 .15rem .8rem;margin:0 0 1.8rem}
+.whose b{display:block;font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:.3rem;font-weight:600}
+.whose span{font-size:.85rem;line-height:1.55;color:var(--soft);font-style:italic}
+
+/* the passages, in the order they appear in the discourse */
+.p{padding:.9rem 0;border-bottom:1px solid var(--rule)}
+.p:last-of-type{border-bottom:0}
+.p .mr{font-family:'Tiro Devanagari Marathi',serif;font-size:1.06rem;line-height:2;display:block}
+.p .en{display:block;margin-top:.4rem;font-size:.9rem;line-height:1.55;color:var(--soft);font-style:italic}
+body[data-en="off"] .p .en{display:none}
+.p .ref{font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.12em;color:var(--faint);
+  float:right;margin-left:.8rem}
+
+/* today — every item quotes the discourse, nothing is invented */
+.today{margin-top:2.2rem;padding-top:1.4rem;border-top:2px solid var(--ember)}
+.today .h{font-family:'Inter',sans-serif;font-size:.57rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ember);display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem}
+.today h2{font-family:'Tiro Devanagari Marathi',serif;font-weight:400;font-size:1.25rem;margin:0 0 .3rem}
+.today .note{font-size:.82rem;line-height:1.55;color:var(--soft);font-style:italic;margin:0 0 1.3rem}
+.today .status{display:inline-block;margin-bottom:1.3rem;font-family:'Inter',sans-serif;font-size:.6rem;
+  line-height:1.45;color:var(--ember);border:1px solid var(--ember);border-radius:3px;
+  padding:.25rem .45rem;opacity:.85}
+.act{display:grid;grid-template-columns:1.6rem 1fr;gap:.2rem .8rem;padding:.75rem 0;
+  border-bottom:1px solid var(--rule)}
+.act:last-child{border-bottom:0}
+.act .n{font-family:'Inter',sans-serif;font-size:.62rem;color:var(--gold);font-weight:600;padding-top:.45em}
+.act q{grid-column:2;font-family:'Tiro Devanagari Marathi',serif;font-size:.95rem;line-height:1.85;
+  quotes:none;display:block;color:var(--ink)}
+.act .do{grid-column:2;margin-top:.35rem;font-size:.92rem;line-height:1.55;color:var(--soft)}
+.act .do b{font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ember);margin-right:.45rem;font-weight:600}
+.act .src{grid-column:2;margin-top:.3rem;font-family:'Inter',sans-serif;font-size:.58rem;
+  letter-spacing:.08em;color:var(--faint)}
+
+.foot{max-width:44rem;margin:1rem auto 0;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;
+  font-family:'Inter',sans-serif;font-size:.65rem;color:var(--faint)}
+@media(max-width:640px){.card{padding:1.8rem 1.3rem 1.5rem}}
+@media print{
+  [data-theme]{--desk:#fff;--paper:#fff;--bd:#fff;--ink:#1b1813;--soft:#4f483e;--rule:#d6cbb6;
+    --gold:#8a6620;--ember:#8a4a20;--shadow:none}
+  body{background:#fff;padding:0;font-size:11pt}
+  .bar,.foot{display:none}
+  .card{box-shadow:none;border:0;max-width:none;padding:0}
+}
+</style>
+</head>
+<body data-en="on">
+
+<div class="bar ui">
+  <div class="brand">सार-पान<small>the short page</small></div>
+  <span class="grow"></span>
+  <button class="btn on" id="bEn">English</button>
+  <button class="btn" id="bTheme">◑</button>
+  <button class="btn" id="bPrint">Print</button>
+  <a class="btn" href="design-e-page.html">पूर्ण प्रवचन →</a>
+</div>
+
+<div class="card">
+  <div class="dl ui" id="dl"></div>
+  <h1 id="tmr"></h1>
+  <p class="sub" id="ten"></p>
+
+  <div class="whose">
+    <b>एका वाचकाची निवड · one reader's selection</b>
+    <span id="whose"></span>
+  </div>
+
+  <div id="passages"></div>
+
+  <section class="today">
+    <div class="h ui"><span>आज हें कसें करावें · carrying it today</span><span id="actN"></span></div>
+    <h2>साधना</h2>
+    <p class="note">Every line below is <b>quoted from this discourse</b>. Only the short
+    “today” line under each quote is written for this edition — and it is deliberately small,
+    because the instruction is already in the text.</p>
+    <span class="status ui">Draft · unattributed · not reviewed by a Marathi scholar or by the publisher</span>
+    <div id="acts"></div>
+  </section>
+</div>
+
+<div class="foot ui">
+  <span>Abridged from the full discourse — <a class="btn" href="design-e-page.html">read all 23 sentences</a></span>
+</div>
+
+<script>/*DATA*/</script>
+<script>/*SUMMARY*/</script>
+<script>
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const dev=n=>String(n).replace(/\d/g,d=>'०१२३४५६७८९'[d]);
+const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},
+             set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* the same grouping the full edition uses */
+const GROUP=Object.fromEntries(Object.entries(DATA.groups||{}).map(([k,v])=>[+k,v]));
+const units=[];
+DATA.sentences.forEach(([n,mr,en,hl])=>{
+  const g=GROUP[n],l=units[units.length-1];
+  if(g&&l&&l.g===g){l.ns.push(n);l.mr+=' '+mr;l.en+=' '+en} else units.push({g,ns:[n],mr,en,hl});
+});
+const marked=units.filter(u=>u.hl);
+
+document.getElementById('dl').textContent=DATA.date.label_mr+'  ·  '+DATA.date.label_en;
+document.getElementById('tmr').textContent=DATA.title_mr;
+document.getElementById('ten').textContent=DATA.title_en;
+document.getElementById('whose').innerHTML=
+  `This short page is <b>not an editorial abridgement</b>. It is the ${dev(marked.length)}
+   passages that <b>one previous reader underlined by hand</b> in a copy of this book,
+   set in the order they appear. Their choices, not the author's emphasis and not ours.
+   The discourse runs to ${dev(DATA.sentences.length)} sentences; this is ${marked.length} of them.`;
+
+document.getElementById('passages').innerHTML=marked.map(u=>
+  `<div class="p"><span class="ref ui">${u.ns.map(dev).join('–')}</span>
+     <span class="mr">${esc(u.mr)}</span><span class="en">${esc(u.en)}</span></div>`).join('');
+
+/* Each action quotes a sentence of the discourse by number; the "today" line is the only
+   authored part, and it restates the quote in practical terms rather than adding doctrine. */
+const ACTS=SUMMARY.practice_actions.map(a=>({n:a.sentence,today:a.today}));
+const byN={}; DATA.sentences.forEach(([n,mr,en])=>byN[n]={mr,en});
+byN['fn']={mr:DATA.footnote.mr,en:DATA.footnote.en};
+document.getElementById('actN').textContent=ACTS.length+' · all quoted';
+document.getElementById('acts').innerHTML=ACTS.map((a,i)=>{
+  const s=byN[a.n];
+  const ref = a.n==='fn' ? 'तळटीप · footnote' : 'वाक्य '+dev(a.n)+' · sentence '+a.n;
+  return `<div class="act"><span class="n">${dev(i+1)}</span>
+    <q>${esc(s.mr)}</q>
+    <div class="do"><b>आज · today</b>${esc(a.today)}</div>
+    <div class="src">${ref}</div></div>`;
+}).join('');
+
+const THEMES=['day','sepia','night'];
+function setTheme(t){document.documentElement.dataset.theme=t;store.set('pravachane-theme',t)}
+setTheme(store.get('pravachane-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'night':'day'));
+document.getElementById('bTheme').onclick=()=>
+  setTheme(THEMES[(THEMES.indexOf(document.documentElement.dataset.theme)+1)%3]);
+document.getElementById('bEn').onclick=e=>{
+  const on=document.body.dataset.en==='off';
+  document.body.dataset.en=on?'on':'off'; e.target.classList.toggle('on',on)};
+document.getElementById('bPrint').onclick=()=>print();
+addEventListener('keydown',e=>{if(e.key==='t'||e.key==='T')document.getElementById('bTheme').click()});
+</script>
+</body>
+</html>

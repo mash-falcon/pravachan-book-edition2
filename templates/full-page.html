@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design E — प्रवचने · one page a day</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="day"]{
+  --desk-a:#efe9dc;--desk-b:#e4dccc;--desk-c:#ded5c3;
+  --paper:#fbf8f1;--sheet-bd:#e6dcc8;--ink:#26221c;--soft:#6f665a;--faint:#a4998a;--ghost:#b3a897;
+  --rule:#e0d6c2;--gold:#b8892f;--ember:#9c5527;--wash:#f7edd9;
+  --gold-line:rgba(184,137,47,.5);--gold-tint:rgba(246,236,216,.85);
+  --chip:#fdfbf6;--chip-bd:#ded3c0;--on-fg:#fffdf8;--comment:#f2ece0;--comment-bd:#ddd2bd;
+  --over:#b4451f;--stripe-a:#faf6ee;--stripe-b:#f6f1e6;
+  --shadow:0 2px 4px rgba(70,55,30,.05),0 24px 60px -24px rgba(70,55,30,.28);
+  --sheen:linear-gradient(90deg,rgba(0,0,0,.03),transparent 6%,transparent 94%,rgba(0,0,0,.02));
+}
+[data-theme="sepia"]{--desk-a:#e8dcc2;--desk-b:#ddceae;--desk-c:#d3c29e;--paper:#f4e9d2;
+  --sheet-bd:#dccdae;--rule:#d7c6a4;--chip:#f8efdc;--chip-bd:#d7c6a4;--comment:#ece0c6;--comment-bd:#d4c3a1}
+[data-theme="night"]{
+  --desk-a:#0f0d0b;--desk-b:#0b0a08;--desk-c:#080706;
+  --paper:#15130f;--sheet-bd:#2a241d;--ink:#e9e1d3;--soft:#9a9082;--faint:#6a6154;--ghost:#584f44;
+  --rule:#2c261f;--gold:#d2a058;--ember:#c07a44;--wash:#2c2114;
+  --gold-line:rgba(210,160,88,.55);--gold-tint:rgba(60,45,24,.5);
+  --chip:#1b1712;--chip-bd:#2f2820;--on-fg:#17130e;--comment:#100e0b;--comment-bd:#28221b;
+  --over:#e0714a;--stripe-a:#191510;--stripe-b:#141109;
+  --shadow:0 2px 4px rgba(0,0,0,.4),0 30px 70px -26px rgba(0,0,0,.8);
+  --sheen:linear-gradient(90deg,rgba(255,255,255,.03),transparent 6%,transparent 94%,rgba(255,255,255,.02));
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;font-family:'EB Garamond',Georgia,serif;font-size:var(--fs,18px);color:var(--ink);
+  background:radial-gradient(60% 60% at 50% 0%,var(--desk-a),var(--desk-b) 60%,var(--desk-c));
+  -webkit-font-smoothing:antialiased;padding:0 1.5rem 4rem;transition:background .45s,color .45s}
+.ui{font-family:'Inter',system-ui,sans-serif}
+button{font-family:'Inter',system-ui,sans-serif;cursor:pointer}
+
+/* toolbar */
+.bar{position:sticky;top:0;z-index:30;max-width:66rem;margin:0 auto;padding:.7rem 0;
+  display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;
+  background:linear-gradient(180deg,var(--desk-a) 60%,transparent)}
+.brand{font-family:'Tiro Devanagari Marathi',serif;font-size:1rem;line-height:1.1}
+.brand small{display:block;font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--faint)}
+.grow{flex:1}
+.seg{display:flex;background:var(--chip);border:1px solid var(--chip-bd);border-radius:999px;padding:2px}
+.seg button{border:0;background:transparent;color:var(--soft);border-radius:999px;
+  font-size:.7rem;font-weight:500;padding:.32rem .75rem;transition:.18s}
+.seg button[aria-pressed="true"]{background:var(--gold);color:var(--on-fg)}
+.btn{font-size:.7rem;font-weight:500;color:var(--soft);background:var(--chip);border:1px solid var(--chip-bd);
+  border-radius:999px;padding:.36rem .7rem;transition:.18s}
+.btn:hover{border-color:var(--gold);color:var(--gold)}
+.btn.on{background:var(--gold);border-color:var(--gold);color:var(--on-fg)}
+.fitbadge{font-family:'Inter',sans-serif;font-size:.62rem;letter-spacing:.1em;padding:.3rem .6rem;
+  border-radius:999px;border:1px solid var(--chip-bd);color:var(--soft);background:var(--chip);white-space:nowrap}
+.fitbadge.bad{color:var(--over);border-color:var(--over)}
+
+/* ================= the page ================= */
+.sheet{max-width:66rem;margin:.75rem auto 0;background:var(--paper);border:1px solid var(--sheet-bd);
+  border-radius:3px;box-shadow:var(--shadow);position:relative;padding:3.6rem 3.6rem 2.6rem;
+  min-height:var(--page-h,980px);transition:background .45s}
+.sheet::before{content:"";position:absolute;inset:0;pointer-events:none;background:var(--sheen)}
+/* where the printed page would end — content past this line is overset */
+.breaks{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none}
+.limit{position:absolute;left:0;right:0;border-top:1px dashed var(--over);opacity:.5}
+.limit span{position:absolute;right:.6rem;top:-.75rem;font-family:'Inter',sans-serif;font-size:.55rem;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--over);background:var(--paper);padding:0 .4rem}
+
+.runhead{position:absolute;top:1.4rem;left:3.6rem;right:3.6rem;display:flex;justify-content:space-between;
+  font-family:'Inter',sans-serif;font-size:.57rem;letter-spacing:.22em;text-transform:uppercase;color:var(--faint)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 15rem;gap:2.6rem;position:relative}
+
+.dl{font-family:'Inter',sans-serif;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.3rem}
+h1{font-family:'Tiro Devanagari Marathi',serif;font-weight:400;font-size:2rem;line-height:1.4;margin:0 0 .2rem}
+.sub{font-style:italic;color:var(--soft);margin:0;font-size:.98rem}
+.hr{height:1px;background:linear-gradient(90deg,var(--rule),transparent);margin:1.5rem 0 1.7rem}
+
+.body{font-family:'Tiro Devanagari Marathi',serif;line-height:2.1;text-align:justify;hyphens:none}
+.body.en{font-family:'EB Garamond',serif;line-height:1.8;text-align:left}
+.body p.t{margin:0 0 1.2rem;text-indent:1.6em}
+.body p.t:first-child{text-indent:0}
+.versal{font-size:1.95em;line-height:1;color:var(--gold);padding-right:.12em;vertical-align:-.06em}
+.s{transition:background .3s,box-shadow .3s}
+.hl{box-shadow:inset 0 -1px 0 0 var(--gold-line);
+  background:linear-gradient(180deg,transparent 72%,var(--gold-tint) 72%)}
+.s.lit{background:var(--wash);box-shadow:inset 0 -1px 0 0 var(--gold)}
+sup.m{font-family:'Inter',sans-serif;font-size:.55em;color:var(--gold);font-weight:600;
+  vertical-align:super;margin-left:.12em;cursor:pointer}
+/* commentary anchor: a drawn lozenge, not a glyph — no font can drop it */
+span.anch{display:inline-block;width:.34em;height:.34em;background:var(--ember);
+  transform:rotate(45deg) translate(.15em,-.62em);margin-left:.15em;cursor:pointer;
+  opacity:.55;transition:.2s;vertical-align:baseline}
+span.anch:hover,span.anch.lit{opacity:1;box-shadow:0 0 0 .12em var(--wash)}
+body[data-comm="off"] span.anch{display:none}
+body[data-marks="off"] .hl{box-shadow:none;background:none}
+body[data-marks="off"] sup.m{display:none}
+
+/* inline translation — Design B's treatment: the other language, quietly, beneath */
+p.tr{display:none;font-family:'EB Garamond',serif;font-style:italic;font-size:.92em;line-height:1.68;
+  color:var(--soft);text-indent:0;margin:-.55rem 0 1.4rem;padding-left:1rem;border-left:1px solid var(--rule)}
+body[data-tr="on"] p.tr{display:block}
+.body.en p.tr{font-family:'Tiro Devanagari Marathi',serif;font-style:normal;line-height:2;font-size:.95em}
+
+.foot{margin-top:1.9rem;padding-top:.8rem;border-top:1px solid var(--rule);font-size:.84rem;color:var(--soft)}
+.foot .num{color:var(--gold);font-weight:600;margin-right:.3rem;font-family:'Inter',sans-serif}
+.foot .fen{display:none;margin-top:.2rem;font-style:italic}
+body[data-tr="on"] .foot .fen{display:block}
+.folio{text-align:center;margin-top:1.6rem;color:var(--ghost);font-family:'Inter',sans-serif;
+  font-size:.65rem;letter-spacing:.2em}
+
+/* ================= margin: the commentary voice ================= */
+.margin{position:relative;font-family:'EB Garamond',Georgia,serif}
+/* a different voice from both the text and the marks: no gold numerals, its own rule */
+.voice{border-top:2px solid var(--ember);padding-top:.5rem;margin-bottom:1.2rem}
+.voice b{display:block;font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ember);margin-bottom:.35rem;font-weight:600}
+.voice span{font-size:.82rem;line-height:1.5;color:var(--soft);font-style:italic}
+.voice .status{display:block;margin-top:.45rem;font-family:'Inter',sans-serif;font-size:.6rem;
+  line-height:1.45;letter-spacing:.02em;color:var(--over);text-decoration:none;
+  border:1px solid var(--over);border-radius:3px;padding:.25rem .4rem;opacity:.85}
+.notes{position:relative}
+/* a continuous rail down the margin: notes sit ON it, so the stretches between them
+   read as "no commentary here" rather than as accidental whitespace */
+.notes::before{content:"";position:absolute;left:0;top:.35rem;bottom:.35rem;width:1px;background:var(--rule)}
+.notes.flow::before{display:none}
+.note{position:absolute;left:0;width:100%;padding-left:.85rem;cursor:pointer;transition:.25s}
+.note::before{content:"";position:absolute;left:-1px;top:.42em;width:3px;height:1.1em;
+  background:var(--ember);opacity:.5;transition:.25s;border-radius:2px}
+.note:hover::before,.note.lit::before{opacity:1;height:1.5em}
+.note .k{font-family:'Tiro Devanagari Marathi',serif;font-size:.9rem;line-height:1.65;
+  color:var(--ink);display:block;margin-bottom:.15rem}
+.note .x{font-size:.84rem;line-height:1.5;color:var(--soft);font-style:italic}
+.note:hover .x,.note.lit .x{color:var(--ink)}
+.notes.flow{position:static}
+.notes.flow .note{position:static;margin-bottom:1rem;border-left:1px solid var(--rule)}
+body[data-comm="off"] .voice,body[data-comm="off"] .notes{display:none}
+
+.marginfoot{margin-top:1.8rem}
+.prov{border-left:2px solid var(--gold);padding:.05rem 0 .05rem .7rem;margin-bottom:1.3rem}
+.prov b{display:block;font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:.3rem;font-weight:600}
+.prov span{font-size:.8rem;line-height:1.5;color:var(--soft)}
+.prov em{font-style:normal;color:var(--ink)}
+body[data-marks="off"] .prov{opacity:.25}
+
+/* the day's practice sits in the margin foot, small */
+.practice{padding-top:.9rem;border-top:1px solid var(--rule)}
+.practice b{display:block;font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ember);margin-bottom:.4rem}
+.practice q{font-family:'Tiro Devanagari Marathi',serif;font-size:.85rem;line-height:1.75;color:var(--ink);quotes:none}
+.mala{display:flex;align-items:center;gap:.6rem;margin-top:.7rem;flex-wrap:wrap}
+.beads{display:flex;gap:2px;flex-wrap:wrap;flex:1;min-width:7rem}
+.beads i{width:6px;height:6px;border-radius:50%;border:1px solid var(--gold);opacity:.22;transition:.2s}
+.beads i.f{opacity:1;background:var(--gold)}
+.mala button{font-size:.62rem;color:var(--gold);background:none;border:1px solid var(--gold);
+  border-radius:999px;padding:.22rem .6rem}
+/* the mala label was removed to reclaim page height — it needs rethinking, and the
+   round-2 review's objection to an unlabelled counter on the reading page still stands */
+
+/* ================= commentary: OFF the page, behind a control ================= */
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(30rem,100%);z-index:50;background:var(--comment);
+  border-left:1px solid var(--comment-bd);box-shadow:-30px 0 60px -30px rgba(0,0,0,.4);
+  transform:translateX(100%);transition:transform .4s cubic-bezier(.2,.8,.2,1);
+  overflow-y:auto;padding:1.6rem 1.8rem 3rem}
+.drawer.open{transform:none}
+.drawer .tag{font-family:'Inter',sans-serif;font-size:.57rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ember);display:flex;justify-content:space-between;margin-bottom:.6rem}
+.drawer .tag b{color:var(--faint);font-weight:400;cursor:pointer}
+.drawer h3{font-family:'Tiro Devanagari Marathi',serif;font-weight:400;font-size:1.2rem;margin:0 0 .5rem}
+.drawer .disc{font-family:'EB Garamond',serif;font-style:italic;color:var(--soft);font-size:.87rem;
+  line-height:1.6;margin:0 0 1.3rem;padding-bottom:1rem;border-bottom:1px dashed var(--comment-bd)}
+.pt{display:flex;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--comment-bd)}
+.pt .dot{width:4px;height:4px;border-radius:50%;background:var(--gold);margin-top:.62em;flex:none}
+.pt-mr{font-family:'Tiro Devanagari Marathi',serif;font-size:.95rem;display:block;margin-bottom:.05rem}
+.pt-en{font-family:'EB Garamond',serif;font-size:.85rem;line-height:1.5;color:var(--soft)}
+
+
+/* ================= factual context — grounding, not commentary ================= */
+.context{max-width:66rem;margin:1.25rem auto 0;border-top:1px solid var(--rule);padding-top:1.2rem}
+.ctag{font-family:'Inter',sans-serif;font-size:.57rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--faint);display:flex;align-items:center;gap:.7rem;margin-bottom:1.1rem}
+.ctag s{flex:1;height:1px;background:var(--rule);text-decoration:none}
+.context .cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.8rem}
+.context h4{font-family:'Inter',sans-serif;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);margin:0 0 .5rem;font-weight:600}
+.context p{margin:0;font-size:.85rem;line-height:1.65;color:var(--soft)}
+.context b{color:var(--ink);font-weight:400}
+@media(max-width:880px){.context .cgrid{grid-template-columns:1fr;gap:1.2rem}}
+
+/* facsimile + gloss */
+.fax{max-width:66rem;margin:1.25rem auto 0;background:var(--paper);border:1px solid var(--rule);
+  border-radius:3px;padding:1.2rem 1.5rem;box-shadow:var(--shadow)}
+.fax h4{font-family:'Inter',sans-serif;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);margin:0 0 .5rem}
+.fax p{margin:0;font-size:.87rem;color:var(--soft);line-height:1.6;max-width:46rem}
+.fax img{display:block;margin:1rem auto 0;max-width:100%;max-height:80vh;border:1px solid var(--rule);background:#fff}
+[data-theme="night"] .fax img{filter:brightness(.82) sepia(.1)}
+.slot{margin-top:1rem;height:8rem;border:1px dashed var(--rule);display:grid;place-items:center;
+  color:var(--ghost);font-family:'Inter',sans-serif;font-size:.72rem;
+  background:repeating-linear-gradient(135deg,var(--stripe-a),var(--stripe-a) 8px,var(--stripe-b) 8px,var(--stripe-b) 16px)}
+.gloss{position:fixed;left:50%;bottom:1.1rem;transform:translate(-50%,140%);z-index:45;
+  width:min(40rem,calc(100vw - 3rem));background:var(--chip);border:1px solid var(--chip-bd);
+  border-radius:12px;padding:.85rem 1.1rem;box-shadow:var(--shadow);opacity:0;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .25s}
+.gloss.show{transform:translate(-50%,0);opacity:1}
+.gloss .h{font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ember);display:flex;justify-content:space-between;margin-bottom:.3rem}
+.gloss .h b{color:var(--faint);font-weight:400;cursor:pointer}
+.gloss p{margin:0;font-size:.94rem;line-height:1.6;font-style:italic}
+
+@media(max-width:880px){
+  body{padding:0 1rem 3rem}
+  .sheet{padding:2.8rem 1.3rem 2rem;min-height:0}
+  .limit{display:none}
+  .runhead{left:1.3rem;right:1.3rem}
+  .grid{grid-template-columns:1fr;gap:1.8rem}
+  .margin{border-top:1px solid var(--rule);padding-top:1.3rem}
+  .drawer{width:100%}
+}
+@media print{
+  [data-theme]{--paper:#fff;--ink:#1b1813;--soft:#4f483e;--rule:#d6cbb6;--faint:#8b8071;--ghost:#9a9082;
+    --gold:#8a6620;--wash:#f7edd9;--gold-line:rgba(138,102,32,.65);--gold-tint:rgba(246,236,216,.9);
+    --sheet-bd:#fff;--shadow:none;--sheen:none}
+  body{background:#fff;padding:0;font-size:11pt}
+  .bar,.fax,.gloss,.breaks{display:none}
+  .context{page-break-before:always}
+  .sheet{box-shadow:none;border:0;max-width:none;padding:0;min-height:0}
+}
+</style>
+</head>
+<body data-marks="on" data-lang="mr" data-tr="off" data-comm="on" data-pagefit="ok">
+
+<div class="bar ui">
+  <div class="brand">प्रवचने<small>Design E · the page yields</small></div>
+  <span class="grow"></span>
+  <span class="fitbadge" id="fit">—</span>
+  <div class="seg" id="lang" role="group" aria-label="Reading language">
+    <button data-lang="mr" aria-pressed="true">मराठी</button>
+    <button data-lang="en" aria-pressed="false">English</button>
+  </div>
+  <button class="btn" id="bTr">अनुवाद · Translation</button>
+  <button class="btn on" id="bMarks">✦ Reader's marks</button>
+  <button class="btn" id="bSize">Aa</button>
+  <button class="btn" id="bTheme">◑</button>
+  <button class="btn on" id="bNotes">टिपण · Commentary</button>
+  <button class="btn" id="bFax">Facsimile</button>
+  <button class="btn" id="bPrint">Print</button>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="breaks" id="breaks"></div>
+  <div class="runhead"><span>प्रवचने · Pravachane</span><span>जानेवारी</span></div>
+  <div class="grid">
+    <article>
+      <div class="dl ui" id="dl"></div>
+      <h1 id="tmr"></h1>
+      <p class="sub" id="ten"></p>
+      <div class="hr"></div>
+      <div class="body" id="body"></div>
+      <div class="foot" id="foot"></div>
+      <div class="folio">— १ —</div>
+    </article>
+
+    <aside class="margin">
+      <div class="voice">
+        <b>टिपण · commentary</b>
+        <span>Written for this edition to explain the page — <i>not</i> the author's words,
+        and not the previous reader's marks.</span>
+        <u class="status">Draft · unattributed · not reviewed by a Marathi scholar
+        or by the publisher</u>
+      </div>
+      <div class="notes" id="notes"></div>
+      <div class="marginfoot">
+        <div class="prov">
+          <b>अधोरेखने · inherited marks</b>
+          <span>The gold underlines are one previous reader's, made by hand in this book.
+          Not the author's emphasis. <em id="provN"></em> passages.</span>
+        </div>
+        <div class="practice">
+          <b>आजची साधना · practice</b>
+          <q id="prac">नाम घ्यावें, तें आपणच आपल्या कानांनीं ऐकावें, आणि त्यांत स्वतःला विसरून जावें.</q>
+          <div class="mala">
+            <div class="beads" id="beads"></div>
+            <button id="bJap">जप</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+
+
+<section class="context">
+  <div class="ctag ui"><span>या पानाविषयीं · about this page</span><s></s><span>facts, not interpretation</span></div>
+  <div class="cgrid">
+    <div>
+      <h4>The book</h4>
+      <p><b>प्रवचने</b> (<i>Pravachane</i>, "discourses") collects the daily teachings of
+      <b>श्री ब्रह्मचैतन्य गोंदवलेकर महाराज</b> — Brahmachaitanya of Gondavale, a saint of
+      Maharashtra whose teaching centres on <b>नामस्मरण</b>, the constant remembrance of the
+      Name of Rama. The book is arranged as one discourse for each day of the year;
+      this is the entry for १ जानेवारी.</p>
+    </div>
+    <div>
+      <h4>This page</h4>
+      <p>Title: <b>परमात्मस्वरूपच असणारें नाम</b>. Twenty-three sentences of continuous prose
+      and one footnote. Set here from a scanned copy of a printed Marathi edition, in its
+      <b>original orthography</b> — नांव, कांहीं, नाहीं — which is retained deliberately
+      rather than modernised.</p>
+    </div>
+    <div>
+      <h4>The underlines</h4>
+      <p>Eleven passages are marked. The marks were made <b>by hand, by a previous reader
+      of this copy</b>, and are reproduced as an inherited layer. They are not the author's
+      emphasis, and no editorial claim is made for them. The scan they come from can be
+      opened with <b>Facsimile</b>.</p>
+    </div>
+    <div>
+      <h4>This edition</h4>
+      <p>A prototype. The English translation and the margin commentary were drafted for
+      this edition and have <b>not been reviewed</b>. Publisher, edition, and date of the
+      printed source, and the rights position for reproducing it, remain
+      <b>to be confirmed</b>.</p>
+    </div>
+  </div>
+</section>
+
+<div class="fax" id="fax" hidden>
+  <h4>Facsimile · मूळ पान</h4>
+  <p>The scanned original. The hand underlines here are the source of the gold rules and
+  numbered notes on the typeset page — compare them directly.</p>
+  <img id="faxImg" src="source/Edn2_Jan01.JPG" alt="Scanned original of the 1 January page">
+  <div class="slot" id="faxSlot" hidden>source/Edn2_Jan01.JPG — not found</div>
+</div>
+
+<div class="gloss" id="gloss">
+  <div class="h"><span id="glossH">English</span><b id="glossX">close ✕</b></div>
+  <p id="glossT"></p>
+</div>
+
+<script>/*DATA*/</script>
+<script>
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},
+             set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+const dev=n=>String(n).replace(/\d/g,d=>'०१२३४५६७८९'[d]);
+
+const GROUP=Object.fromEntries(Object.entries(DATA.groups||{}).map(([k,v])=>[+k,v]));
+const units=[];
+DATA.sentences.forEach(([n,mr,en,hl])=>{
+  const g=GROUP[n],l=units[units.length-1];
+  if(g&&l&&l.g===g){l.ns.push(n);l.mr+=' '+mr;l.en+=' '+en} else units.push({g,ns:[n],mr,en,hl});
+});
+const marked=units.filter(u=>u.hl);
+const numOf={},lastOf={};
+marked.forEach((u,i)=>{u.ns.forEach(n=>numOf[n]=i+1);lastOf[u.ns[u.ns.length-1]]=true});
+
+document.getElementById('dl').textContent=DATA.date.label_mr+'  ·  '+DATA.date.label_en;
+document.getElementById('tmr').textContent=DATA.title_mr;
+document.getElementById('ten').textContent=DATA.title_en;
+document.getElementById('provN').textContent=dev(marked.length);
+document.getElementById('foot').innerHTML=
+  `<span class="num">${DATA.footnote.marker}.</span>${esc(DATA.footnote.mr)}
+   <em class="fen">${esc(DATA.footnote.en)}</em>`;
+
+/* ---------- body: primary language + inline translation beneath each paragraph ---------- */
+const body=document.getElementById('body');
+function renderBody(){
+  const mr = document.body.dataset.lang==='mr';
+  body.className='body'+(mr?'':' en');
+  body.innerHTML=DATA.paras.map(([a,b])=>{
+    const ss=DATA.sentences.filter(s=>s[0]>=a&&s[0]<=b);
+    const main='<p class="t">'+ss.map(([n,m,e,hl])=>{
+      let t=esc(mr?m:e);
+      if(mr&&n===1) t=t.replace(/^(\S+)/,'<span class="versal">$1</span>');
+      const anch=(commAt[n]||[]).map(i=>`<span class="anch" data-c="${i}" title="commentary"></span>`).join('');
+      return `<span class="s ${hl?'hl':''}" data-n="${n}" data-p="${numOf[n]||''}">${t}</span>${anch} `;
+    }).join('')+'</p>';
+    return main+'<p class="tr">'+ss.map(s=>esc(mr?s[2]:s[1])).join(' ')+'</p>';
+  }).join('');
+}
+
+/* ---------- margin: commentary, anchored to the line it explains ---------- */
+const notes=document.getElementById('notes');
+/* DATA.points = [मराठी headline, English explanation, sentence it explains] */
+const COMM=DATA.points.map(([mr,en,n],i)=>({i,mr,en,n}))
+  .sort((a,b)=>a.n-b.n);   /* authored order is not document order — align needs document order */
+const commAt={}; COMM.forEach(c=>{(commAt[c.n]=commAt[c.n]||[]).push(c.i)});
+
+function renderNotes(){
+  notes.innerHTML=COMM.map(c=>
+    `<div class="note" data-n="${c.n}" data-c="${c.i}">
+       <b class="k">${esc(c.mr)}</b><span class="x">${esc(c.en)}</span></div>`).join('');
+  document.getElementById('provN').textContent=dev(marked.length);
+}
+function aligned(){return innerWidth>880}
+function place(){
+  if(!aligned()){notes.classList.add('flow');notes.style.minHeight='';return}
+  notes.classList.remove('flow');
+  /* measure against the notes container itself — it sits below the commentary header,
+     and using .grid here offset every note by that header's height */
+  const top=notes.getBoundingClientRect().top+scrollY;
+  let last=-999;
+  notes.querySelectorAll('.note').forEach(nt=>{
+    const src=document.querySelector(`.s[data-n="${nt.dataset.n}"]`);
+    const r=src&&src.getClientRects()[0]; if(!r) return;
+    let y=r.top+scrollY-top; if(y<last+14) y=last+14;
+    last=y+nt.offsetHeight; nt.style.top=y+'px';
+  });
+  notes.style.minHeight=(last+20)+'px';
+}
+
+/* ---------- pages: the page yields, the type does not ---------- */
+const sheet=document.getElementById('sheet'),fitBadge=document.getElementById('fit'),
+      breaks=document.getElementById('breaks');
+let PAGE_PINNED=false, BASE=0, PAGES=1;
+
+/* A5 / ISO proportion (1 : √2) — the page shape is a format decision, and a taller page
+   is what lets the Marathi stay at 18px on one page. Pin any height with ?page= */
+function basePage(){
+  if(PAGE_PINNED) return parseInt(getComputedStyle(document.documentElement)
+    .getPropertyValue('--page-base'),10);
+  BASE=Math.round(sheet.clientWidth*Math.SQRT2);
+  document.documentElement.style.setProperty('--page-base',BASE+'px');
+  return BASE;
+}
+/* measure the CONTENT, not the box — the box is floored by the page's own min-height */
+function contentH(){
+  const cs=getComputedStyle(sheet);
+  const top=sheet.getBoundingClientRect().top+scrollY;
+  const bottom=Math.max(...['article','.margin'].map(sel=>{
+    const e=sheet.querySelector(sel); return e?e.getBoundingClientRect().bottom+scrollY:0;}));
+  return Math.ceil(bottom-top+parseFloat(cs.paddingBottom));
+}
+function drawBreaks(n,base){
+  breaks.innerHTML='';
+  for(let k=1;k<=n;k++){
+    const d=document.createElement('div');
+    d.className='limit'; d.style.top=(base*k)+'px';
+    d.innerHTML=`<span>पान ${dev(k+1)} · page ${k+1}</span>`;
+    breaks.appendChild(d);
+  }
+}
+/* Long days extend onto a further page rather than shrinking the Marathi. */
+function checkFit(){
+  if(innerWidth<=880){fitBadge.textContent='—';fitBadge.className='fitbadge';
+    document.body.dataset.pagefit='ok';PAGES=1;breaks.innerHTML='';return true}
+  const base=basePage(), need=contentH();
+  PAGES=Math.max(1,Math.ceil((need-2)/base));
+  document.documentElement.style.setProperty('--page-h',(base*PAGES)+'px');
+  drawBreaks(PAGES-1,base);
+  const spare=base*PAGES-need;
+  document.body.dataset.pagefit = PAGES===1?'ok':'over';
+  fitBadge.textContent = PAGES===1 ? `एक पान · one page +${spare}`
+                                   : `${dev(PAGES)} पानें · ${PAGES} pages`;
+  fitBadge.className='fitbadge'+(PAGES===1?'':' bad');
+  return PAGES===1;
+}
+
+/* Type sizes never go below MIN_READABLE — this book is read by older eyes,
+   and "one page" is a production constraint, not a reader benefit. */
+const MIN_READABLE=17;
+const SIZES=[18,19,21,17];              // the Aa control, all at or above the floor
+const FIT_SIZES=[19,18,MIN_READABLE];   // what autofit is allowed to try
+function autoFit(){
+  for(const s of FIT_SIZES){
+    document.body.style.setProperty('--fs',s+'px');
+    place();
+    if(checkFit()) return {size:s,pages:1};
+  }
+  document.body.style.setProperty('--fs',MIN_READABLE+'px');
+  place(); checkFit();
+  return {size:MIN_READABLE,pages:PAGES};
+}
+
+/* ---------- linking: a note, its anchor, and the line it explains ---------- */
+function lit(c,on){
+  if(c===undefined||c===null||c==='')return;
+  document.querySelectorAll(`.note[data-c="${c}"],.anch[data-c="${c}"]`)
+    .forEach(e=>e.classList.toggle('lit',on));
+  const note=document.querySelector(`.note[data-c="${c}"]`);
+  if(note){const t=document.querySelector(`.s[data-n="${note.dataset.n}"]`);
+    if(t)t.classList.toggle('lit',on);}
+}
+document.addEventListener('mouseover',e=>{const t=e.target.closest('.note,.anch');if(t)lit(t.dataset.c,true)});
+document.addEventListener('mouseout', e=>{const t=e.target.closest('.note,.anch');if(t)lit(t.dataset.c,false)});
+document.addEventListener('click',e=>{
+  const n=e.target.closest('.note,.anch'); if(!n)return;
+  const note=document.querySelector(`.note[data-c="${n.dataset.c}"]`); if(!note)return;
+  const t=document.querySelector(`.s[data-n="${note.dataset.n}"]`);
+  if(t){t.scrollIntoView({behavior:'smooth',block:'center'});
+    lit(n.dataset.c,true);setTimeout(()=>lit(n.dataset.c,false),1700)}
+});
+
+const gloss=document.getElementById('gloss'),glossT=document.getElementById('glossT'),
+      glossH=document.getElementById('glossH');
+document.getElementById('glossX').onclick=()=>gloss.classList.remove('show');
+body.addEventListener('click',e=>{
+  const s=e.target.closest('.s');if(!s)return;
+  const rec=DATA.sentences.find(x=>x[0]===+s.dataset.n);if(!rec)return;
+  const mr=document.body.dataset.lang==='mr';
+  glossH.textContent=mr?'English':'मराठी';
+  glossT.textContent=mr?rec[2]:rec[1];
+  glossT.style.fontFamily=mr?"'EB Garamond',serif":"'Tiro Devanagari Marathi',serif";
+  gloss.classList.add('show');
+});
+
+/* ---------- commentary layer on/off ---------- */
+document.getElementById('bNotes').onclick=e=>{
+  const on=document.body.dataset.comm==='off';
+  document.body.dataset.comm=on?'on':'off';
+  e.target.classList.toggle('on',on);
+  requestAnimationFrame(()=>{place();checkFit()});
+};
+
+/* mala */
+const beads=document.getElementById('beads');
+beads.innerHTML=Array.from({length:108},()=>'<i></i>').join('');
+let jap=0;
+document.getElementById('bJap').onclick=()=>{
+  jap=(jap+1)%109;
+  beads.querySelectorAll('i').forEach((b,i)=>b.classList.toggle('f',i<jap));
+};
+
+/* ---------- controls ---------- */
+function refresh(){renderBody();renderNotes();requestAnimationFrame(()=>{place();checkFit()})}
+document.getElementById('lang').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  document.body.dataset.lang=b.dataset.lang;
+  document.querySelectorAll('#lang button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  gloss.classList.remove('show'); refresh();
+});
+document.getElementById('bTr').onclick=e=>{
+  const on=document.body.dataset.tr==='off';
+  document.body.dataset.tr=on?'on':'off';e.target.classList.toggle('on',on);
+  requestAnimationFrame(()=>{place();checkFit()})};
+document.getElementById('bMarks').onclick=e=>{
+  const off=document.body.dataset.marks==='on';
+  document.body.dataset.marks=off?'off':'on';e.target.classList.toggle('on',!off)};
+let si=0;
+document.getElementById('bSize').onclick=()=>{si=(si+1)%SIZES.length;
+  document.body.style.setProperty('--fs',SIZES[si]+'px');
+  requestAnimationFrame(()=>{place();checkFit()})};
+const THEMES=['day','sepia','night'];
+function setTheme(t){document.documentElement.dataset.theme=t;store.set('pravachane-theme',t)}
+setTheme(store.get('pravachane-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'night':'day'));
+document.getElementById('bTheme').onclick=()=>
+  setTheme(THEMES[(THEMES.indexOf(document.documentElement.dataset.theme)+1)%3]);
+document.getElementById('bFax').onclick=e=>{const f=document.getElementById('fax');
+  f.hidden=!f.hidden;e.target.classList.toggle('on',!f.hidden);
+  if(!f.hidden)f.scrollIntoView({behavior:'smooth',block:'start'})};
+document.getElementById('faxImg').onerror=function(){this.hidden=true;
+  document.getElementById('faxSlot').hidden=false};
+document.getElementById('bPrint').onclick=()=>print();
+addEventListener('keydown',e=>{if(e.key==='t'||e.key==='T')document.getElementById('bTheme').click()});
+addEventListener('resize',()=>{place();checkFit()});
+
+/* ---------- boot ---------- */
+refresh();
+(function(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('theme'))setTheme(q.get('theme'));
+  if(q.get('lang')==='en')document.querySelector('#lang button[data-lang="en"]').click();
+  if(q.get('tr')==='on')document.getElementById('bTr').click();
+  if(q.get('marks')==='off')document.getElementById('bMarks').click();
+  if(q.get('comm')==='off')document.getElementById('bNotes').click();
+  if(q.get('fax')==='1')document.getElementById('bFax').click();
+  if(q.get('page')){PAGE_PINNED=true;
+    document.documentElement.style.setProperty('--page-h',q.get('page')+'px');}
+  setTimeout(()=>{place();if(q.get('autofit')==='1')autoFit();else checkFit()},650);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design B — सूत्र · the linked deck</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&family=Spectral:ital,wght@0,300;0,400;1,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ---------- theme tokens ---------- */
+:root,[data-theme="night"]{
+  --bg:#080706; --ink:#f4eee3; --dim:#8b8073; --faint:#5a5147; --line:#241f1a;
+  --gold:#d9a45b; --ember:#b4643a; --gold-soft:rgba(217,164,91,.14); --gold-rule:rgba(217,164,91,.35);
+  --pane-bd:#262019; --pane-a:#241d16; --pane-b:#110e0c; --pane-c:#0b0908;
+  --pane-sh:0 30px 80px -30px rgba(0,0,0,.85); --pane-hi:rgba(255,255,255,.04);
+  --track:#332c25; --chip-bg:#191512; --chip-bd:#2e2822; --chip-fg:#b0a493; --chip-hv:#5a4630;
+  --chip-on-fg:#181310; --ghost:#4d453c; --ring:#3a332b; --stroke:#423a30;
+  --prose:#7b7266; --prose-k:#a9a091; --live:#fff8ec; --card-key:#fff9ef;
+  --list:#c8beb0; --gloss:#b6ab9b; --tr:#7a7165; --hint:#463f37; --badge:#6b5b45; --badge-bd:#33291f;
+  --scrim:rgba(8,7,6,.95); --thumb:#2b2520;
+  --aura-a:rgba(217,164,91,.17); --aura-b:rgba(180,100,58,.07); --aura-base:.3;
+}
+[data-theme="day"]{
+  --bg:#f7f2e8; --ink:#241f18; --dim:#6d6455; --faint:#9a9082; --line:#e4dac8;
+  --gold:#a8741d; --ember:#9c5527; --gold-soft:rgba(168,116,29,.13); --gold-rule:rgba(168,116,29,.40);
+  --pane-bd:#e3d9c6; --pane-a:#fffdf8; --pane-b:#fbf6ec; --pane-c:#f5eee1;
+  --pane-sh:0 24px 60px -28px rgba(90,70,35,.30); --pane-hi:rgba(255,255,255,.9);
+  --track:#e0d5c1; --chip-bg:#fffdf8; --chip-bd:#dfd4c0; --chip-fg:#6d6455; --chip-hv:#c9a978;
+  --chip-on-fg:#fffdf8; --ghost:#a89d8b; --ring:#ddd2be; --stroke:#d8cdb8;
+  --prose:#5f5747; --prose-k:#37312a; --live:#1c1810; --card-key:#1a160f;
+  --list:#4a4338; --gloss:#5f5747; --tr:#7a7060; --hint:#a89d8b; --badge:#96835f; --badge-bd:#e0d5c1;
+  --scrim:rgba(250,246,238,.95); --thumb:#ddd2be;
+  --aura-a:rgba(168,116,29,.10); --aura-b:rgba(156,85,39,.05); --aura-base:.35;
+}
+*{box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Spectral',Georgia,serif;
+  -webkit-font-smoothing:antialiased;transition:background .45s,color .45s}
+.ui{font-family:'Inter',system-ui,sans-serif}
+button{font-family:'Inter',system-ui,sans-serif}
+
+.aura{position:fixed;inset:0;pointer-events:none;z-index:0;transition:opacity 1.1s ease;
+  opacity:var(--aura-base);
+  background:radial-gradient(48% 55% at 20% 50%,var(--aura-a),transparent 70%),
+             radial-gradient(60% 60% at 80% 28%,var(--aura-b),transparent 70%)}
+body.key .aura{opacity:1}
+
+.stage{position:relative;z-index:1;height:100%;display:grid;
+  grid-template-columns:clamp(360px,38vw,560px) minmax(0,1fr);gap:clamp(1.5rem,4vw,4rem);
+  padding:clamp(1.1rem,3vh,2.2rem) clamp(1.25rem,3.5vw,3rem)}
+@media(max-width:1000px){.stage{grid-template-columns:1fr}.right{display:none}}
+
+/* ---------------- left: the deck ---------------- */
+.pane{position:relative;height:100%;border-radius:20px;overflow:hidden;border:1px solid var(--pane-bd);
+  background:radial-gradient(120% 70% at 50% -8%,var(--pane-a) 0%,var(--pane-b) 55%,var(--pane-c) 100%);
+  box-shadow:var(--pane-sh),inset 0 1px 0 var(--pane-hi);transition:background .45s,border-color .45s}
+
+.pips{position:absolute;top:1.5rem;left:1.9rem;right:1.9rem;display:flex;gap:3px;z-index:9}
+.pips i{flex:1;height:2px;border-radius:2px;background:var(--track);transition:.35s;cursor:pointer}
+.pips i.on{background:var(--gold)}
+.hud{position:absolute;top:2.15rem;left:1.9rem;right:1.9rem;z-index:9;display:flex;
+  justify-content:space-between;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase}
+.hud .l{color:var(--gold)} .hud .r{color:var(--faint);font-variant-numeric:tabular-nums}
+
+.deck{position:absolute;inset:0;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none}
+.deck::-webkit-scrollbar{display:none}
+.card{height:100%;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;
+  padding:5rem 2.6rem 6rem;position:relative}
+.kicker{font-size:.57rem;letter-spacing:.26em;text-transform:uppercase;color:var(--ember);
+  margin-bottom:1.15rem;display:flex;align-items:center;gap:.55rem;font-family:'Inter',sans-serif}
+.kicker::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,var(--ring),transparent)}
+.mr{font-family:'Tiro Devanagari Marathi',serif;font-size:clamp(1.15rem,1.55vw,1.45rem);line-height:2;
+  opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+.card.seen .mr{opacity:1;transform:none}
+.en{font-weight:300;font-style:italic;color:var(--dim);font-size:.95rem;line-height:1.65;
+  margin-top:1.35rem;max-height:0;overflow:hidden;opacity:0;transition:max-height .5s,opacity .4s}
+.card.reveal .en{max-height:18rem;opacity:1}
+.tapme{margin-top:1.5rem;font-family:'Inter',sans-serif;font-size:.58rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ghost);transition:.3s}
+.card.reveal .tapme{opacity:0}
+.card.key::before{content:"";position:absolute;left:1.5rem;top:34%;bottom:34%;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,transparent,var(--gold),transparent)}
+.card.key .mr{color:var(--card-key)}
+.joined{font-family:'Inter',sans-serif;font-size:.54rem;letter-spacing:.18em;color:var(--badge);
+  border:1px solid var(--badge-bd);border-radius:999px;padding:.12rem .45rem;margin-left:.5rem}
+
+.title-card .big{font-family:'Inter',sans-serif;font-size:4.6rem;font-weight:600;line-height:1;
+  color:transparent;-webkit-text-stroke:1px var(--stroke);margin-bottom:.5rem}
+.title-card h1{font-family:'Tiro Devanagari Marathi',serif;font-weight:400;font-size:2rem;
+  line-height:1.5;margin:.2rem 0 .6rem}
+.title-card p{font-style:italic;color:var(--dim);margin:0;font-size:.95rem}
+.end .ring{width:82px;height:82px;border-radius:50%;border:1px solid var(--ring);display:grid;
+  place-items:center;margin-bottom:1.4rem;font-family:'Tiro Devanagari Marathi',serif;
+  font-size:1.5rem;color:var(--gold)}
+.end h2{font-family:'Inter',sans-serif;font-size:.58rem;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--ember);margin:0 0 .9rem}
+.end ul{padding:0;margin:0}
+.end li{list-style:none;padding:.48rem 0;border-bottom:1px solid var(--line);font-size:.87rem;color:var(--list)}
+.end li b{font-family:'Tiro Devanagari Marathi',serif;font-weight:400;color:var(--ink);display:block;font-size:1rem}
+
+.bottom{position:absolute;bottom:0;left:0;right:0;z-index:9;padding:1rem 1.9rem 1.5rem;
+  background:linear-gradient(180deg,transparent,var(--scrim) 45%);display:flex;align-items:center;gap:.45rem}
+.pill{font-size:.68rem;font-weight:500;color:var(--chip-fg);background:var(--chip-bg);
+  border:1px solid var(--chip-bd);border-radius:999px;padding:.42rem .72rem;cursor:pointer;
+  transition:.2s;white-space:nowrap}
+.pill:hover{color:var(--gold);border-color:var(--chip-hv)}
+.pill.on{background:var(--gold);color:var(--chip-on-fg);border-color:var(--gold)}
+.grow{flex:1}
+.play{width:2.1rem;height:2.1rem;border-radius:50%;display:grid;place-items:center;position:relative;
+  border:1px solid var(--chip-bd);background:var(--chip-bg);color:var(--chip-fg);cursor:pointer;font-size:.7rem}
+.play.on{color:var(--gold);border-color:var(--gold)}
+.play svg{position:absolute;inset:-1px;transform:rotate(-90deg)}
+.play circle{fill:none;stroke:var(--gold);stroke-width:1.5;transition:stroke-dashoffset .2s linear}
+
+/* ---------------- right: the full text ---------------- */
+.right{height:100%;display:flex;flex-direction:column;min-height:0}
+.rhead{flex:none;padding-bottom:1rem;border-bottom:1px solid var(--line)}
+.rhead .eyebrow{font-family:'Inter',sans-serif;font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--gold);display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem}
+.rhead .eyebrow s{flex:1;height:1px;background:var(--line);text-decoration:none}
+.rhead h2{font-family:'Tiro Devanagari Marathi',serif;font-weight:400;font-size:1.5rem;margin:0 0 .2rem}
+.rhead p{margin:0;font-style:italic;color:var(--dim);font-size:.88rem}
+.themes{display:flex;gap:2px;background:var(--chip-bg);border:1px solid var(--chip-bd);
+  border-radius:999px;padding:2px;margin-left:.5rem}
+.themes button{border:0;background:transparent;color:var(--chip-fg);cursor:pointer;border-radius:999px;
+  font-size:.62rem;letter-spacing:.1em;padding:.22rem .55rem;transition:.2s}
+.themes button.on{background:var(--gold);color:var(--chip-on-fg)}
+
+.scroll{flex:1;min-height:0;overflow-y:auto;padding:1.7rem 1.2rem 3rem 0;scrollbar-width:thin;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 3rem,#000 calc(100% - 3rem),transparent);
+          mask-image:linear-gradient(180deg,transparent,#000 3rem,#000 calc(100% - 3rem),transparent)}
+.scroll::-webkit-scrollbar{width:5px}
+.scroll::-webkit-scrollbar-thumb{background:var(--thumb);border-radius:9px}
+.prose{font-family:'Tiro Devanagari Marathi',serif;font-size:1.03rem;line-height:2.2;
+  text-align:justify;max-width:46rem}
+.prose p{margin:0 0 1.4rem;text-indent:1.5em}
+.prose p:first-child{text-indent:0}
+.sn{color:var(--prose);transition:color .5s,background .5s,box-shadow .5s;cursor:pointer;
+  border-radius:3px;padding:0 .05em}
+.sn.k{color:var(--prose-k);box-shadow:inset 0 -1px 0 0 var(--gold-rule)}
+.sn:hover{color:var(--ink)}
+.sn.live{color:var(--live);background:var(--gold-soft);box-shadow:inset 0 -1px 0 0 var(--gold)}
+.tr{display:none;font-family:'Spectral',serif;font-style:italic;font-size:.9rem;line-height:1.7;
+  color:var(--tr);text-indent:0;margin:-.6rem 0 1.6rem;padding-left:1rem;
+  border-left:1px solid var(--line);max-width:46rem}
+body[data-tr="on"] .tr{display:block}
+.fn{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--line);
+  font-family:'Tiro Devanagari Marathi',serif;font-size:.88rem;line-height:1.95;color:var(--dim);max-width:46rem}
+.fn i{font-style:normal;font-family:'Inter',sans-serif;color:var(--gold);margin-right:.35rem}
+
+.gloss{flex:none;margin-top:.4rem;border-top:1px solid var(--line);padding:.85rem 0 .9rem;
+  display:flex;gap:.9rem;align-items:flex-start;min-height:4.6rem}
+.gloss .tag{font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ember);flex:none;padding-top:.25rem;width:4.6rem}
+.gloss .txt{font-style:italic;color:var(--gloss);font-size:.97rem;line-height:1.6;
+  transition:opacity .3s,transform .3s}
+.gloss .txt.swap{opacity:0;transform:translateY(6px)}
+
+.rfoot{flex:none;padding-top:.8rem;border-top:1px solid var(--line);display:flex;align-items:center;
+  gap:.9rem;font-family:'Inter',sans-serif;font-size:.63rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint)}
+.meter{flex:1;height:2px;background:var(--track);border-radius:2px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ember),var(--gold));
+  transition:width .45s cubic-bezier(.2,.8,.2,1)}
+.rfoot b{color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums}
+.tgl{font-size:.63rem;letter-spacing:.14em;text-transform:uppercase;color:var(--chip-fg);background:none;
+  border:1px solid var(--chip-bd);border-radius:999px;padding:.28rem .6rem;cursor:pointer}
+.tgl.on{color:var(--gold);border-color:var(--chip-hv)}
+.hint{color:var(--hint);text-transform:none;letter-spacing:.02em;font-size:.68rem}
+</style>
+</head>
+<body data-tr="off">
+<div class="aura"></div>
+
+<div class="stage">
+  <div class="pane">
+    <div class="pips" id="pips"></div>
+    <div class="hud ui"><span class="l">१ जानेवारी</span><span class="r" id="hudR">—</span></div>
+    <div class="deck" id="deck"></div>
+    <div class="bottom ui">
+      <button class="pill on" id="keyOnly">✦ Marked</button>
+      <button class="pill" id="revealAll">अ / A</button>
+      <span class="grow"></span>
+      <button class="play" id="play" title="Auto-advance"><span id="playIcon">▶</span>
+        <svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="16"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="rhead">
+      <div class="eyebrow ui"><span>प्रवचने · 1 January · Day 1</span><s></s>
+        <span id="ecount"></span>
+        <span class="themes" id="themes">
+          <button data-t="day" title="Light">☀ Day</button>
+          <button data-t="night" title="Dark">☾ Night</button>
+        </span>
+      </div>
+      <h2 id="tmr"></h2>
+      <p id="ten"></p>
+    </div>
+    <div class="scroll" id="scroll">
+      <div class="prose" id="prose"></div>
+      <div class="fn" id="fn"></div>
+    </div>
+    <div class="gloss"><span class="tag">English</span><span class="txt" id="glossTxt">—</span></div>
+    <div class="rfoot ui">
+      <span>अधोरेखित <b id="cur">0</b>/<b id="tot">0</b></span>
+      <span class="meter"><i id="meter"></i></span>
+      <button class="tgl" id="trBtn">Inline translation</button>
+      <span class="hint">↑ ↓ move · click a line to jump · T theme</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  date:{label_mr:"१ जानेवारी", label_en:"1 January"},
+  title_mr:"परमात्मस्वरूपच असणारें नाम",
+  title_en:"The Name That Is Itself the Supreme Reality",
+  footnote:{marker:"१", mr:"ज्याची प्रत्येक कृति रामाच्या स्मरणामध्यें होते तोच रामराज्यांत खरा राहतो.",
+            en:"He whose every act is done in remembrance of Rama is the one who truly dwells in Rama's kingdom."},
+  paras:[[1,10],[11,15],[16,19],[20,23]],
+  sentences:[
+ [1,"नाम म्हणजे भगवंताचें नांव.","“Nama” means the Name of God.",0],
+ [2,"देवाच्या कोणत्याहि नांवांत फरक नाहीं.","There is no difference between any of God’s names.",0],
+ [3,"नाम हा जीव आणि शिव यांमधील दुवा आहे.","The Name is the link between the individual soul and God.",1],
+ [4,"नाम हें साध्य आहे व साधनहि आहे.","The Name is both the goal and the means to it.",1],
+ [5,"नाम सगुण आहे आणि निर्गुणहि आहे.","The Name is saguna — with form and attributes — and also nirguna, the formless.",1],
+ [6,"नामाचा आरंभ सगुणांत आहे व शेवट निर्गुणांत आहे.","The Name begins in the saguna and ends in the nirguna.",1],
+ [7,"आरंभ सगुणांत आहे असें म्हणण्याचें कारण हें कीं, भगवंत मुळांत जो निराकार, निर्गुण आहे, तो जेव्हां सगुणांत आला तेव्हांच त्याला नाम-रूप लागलें;","It is said to begin in the saguna because God, originally formless and without attributes, acquired name and form only when He assumed a manifest form;",1],
+ [8,"व सगुणरूप नाहींसें झालें तरी नाम शिल्लकच राहिलें, म्हणून तें निर्गुणहि आहे.","and even when that form dissolves, the Name remains — which is why it is nirguna as well.",1],
+ [9,"तेव्हां सगुण किंवा निर्गुण भक्तीला नामाचाच आधार आहे.","So whether devotion is to the formed or the formless, its support is the Name alone.",0],
+ [10,"नाम हा सत्संगाचा पाया आहे व कळसहि आहे.","The Name is both the foundation of satsang and its crowning pinnacle.",0],
+ [11,"नाम म्हणजे आपली वृत्ति आणि भगवंत यांना जोडणारी सांखळीच आहे.","The Name is the very chain that joins our inner disposition to God.",1],
+ [12,"लग्न झाल्यावर स्त्री जशी नवऱ्याशीं एकरूप होऊन जाते, त्याप्रमाणें वृत्तीचें नामाशीं लग्न होऊन ती नामरूप बनली पाहिजे.","Just as a wife becomes one with her husband after marriage, our disposition must be wedded to the Name until it takes the Name’s own form.",1],
+ [13,"अन्नाला स्वतःची चव असते; त्याच्यामध्यें आपण आपली गोडी व आवड घालून नंतर तें आपण खातों.","Food has a taste of its own; we add our own relish and liking to it and then eat it.",1],
+ [14,"पण नामाला स्वतःची अशी चव नाहीं. त्याच्यामध्यें आपणच आपली गोडी घालून तें घेतलें पाहिजे.","But the Name has no such taste of its own. We ourselves must put our sweetness into it and then take it.",0],
+ [15,"आपण जितकी जास्त गोडी त्यामध्यें घालूं तितकें तें अधिक गोड वाटेल.","The more sweetness we pour into it, the sweeter it will taste.",0],
+ [16,"पंढरपूरला जाण्यास पुष्कळ रस्ते आहेत; परंतु सर्वांना शेवटीं “बारींतून” जाऊनच देवदर्शन घ्यावें लागतें.","There are many roads to Pandharpur; but in the end everyone must pass through the same narrow queue to have darshan of God.",0],
+ [17,"त्याप्रमाणें, इतर साधनें जरी केलीं तरी नामसाधन केल्यावरच आत्मस्वरूपाची प्राप्ति होते.","In the same way, whatever other practices one may follow, realisation of one’s true Self comes only through the practice of the Name.",1],
+ [18,"आपण नाम घ्यावें, तें आपणच आपल्या कानांनीं ऐकावें, आणि तें घेतां घेतां त्यांत शेवटीं स्वतःला विसरून जावें, हाच नामसाधनेंतील आनंदाचा मार्ग आहे.","Take the Name, hear it with your own ears, and while taking it, at last forget yourself in it — this is the path of joy in the practice of the Name.",1],
+ [19,"जसें आपलें आपलेपण आपल्या नांवांत आहे, तसें देवाचें देवपण त्याच्या नामांत आहे.","Just as our own selfhood lives in our name, so God’s godhood lives in His Name.",1],
+ [20,"आपण आज जें नाम घेतों तेंच नाम कायम राहतें; परंतु आपली देहबुद्धि जसजशी कमी होईल तसतसें तें नाम व्यापक व अर्थगर्भ बनत जातें, आणि शेवटीं नाम हें परमात्मस्वरूपच आहे असा अनुभव येतो.","The Name we take today stays the same; but as body-consciousness thins, that Name grows vaster and more laden with meaning, until at last one experiences that the Name is itself the Supreme Reality.",0],
+ [21,"पाणी हें जसें शरीराचें जीवन आहे, तसें नाम हें मनाचें “जीवन” बनलें पाहिजे.","As water is the life of the body, so must the Name become the “life” of the mind.",1],
+ [22,"अंतकाळीं अगदीं शेवटीं सुटणारी वस्तु म्हणजे भगवंताचें नाम पाहिजे. नामांत शेवटचा श्वास गेला पाहिजे.","At the end of life, the very last thing to leave us should be God’s Name. The final breath should go out in the Name.",1],
+ [23,"नामांत एका आनंदाशिवाय दुसरें कांहीं नाहीं.","In the Name there is nothing but bliss.",0]
+  ],
+  points:[
+   ["नाम = साध्य + साधन","Both the road and the destination — nothing further is needed.",4],
+   ["जीव–शिव दुवा","The link between soul and God; the chain that binds your disposition to Him.",3],
+   ["सगुण ते निर्गुण","Arises with form, survives when form dissolves — so it serves every devotion.",6],
+   ["गोडी आपणच घालायची","The Name has no taste of its own; what you put in is what you taste.",13],
+   ["“बारीं”शिवाय दर्शन नाही","Many roads, one gate — realisation comes through the Name.",17],
+   ["घ्या · ऐका · विसरा","Say it, hear it yourself, lose yourself in it.",18],
+   ["मनाचें जीवन","As water is the life of the body, the Name is the life of the mind.",21],
+   ["शेवटचा श्वास नामांत","Let the Name be the last thing to leave you.",22]
+  ]
+};
+</script>
+<script>
+/* ---------- theme ---------- */
+const THEME_KEY='pravachane-theme';
+/* localStorage throws in sandboxed / data: / blocked-cookie contexts — never let it break the page */
+const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},
+             set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+function setTheme(t){
+  document.documentElement.dataset.theme=t;
+  document.querySelectorAll('#themes button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  store.set(THEME_KEY,t);
+}
+setTheme(store.get(THEME_KEY) ||
+  (matchMedia('(prefers-color-scheme: light)').matches ? 'day' : 'night'));
+document.getElementById('themes').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(b) setTheme(b.dataset.t)});
+
+/* --- underlined passages spanning two sentences read as ONE unit --- */
+const GROUP={5:1,6:1,7:2,8:2,11:3,12:3};
+const units=[];
+DATA.sentences.forEach(([n,mr,en,hl])=>{
+  const g=GROUP[n], last=units[units.length-1];
+  if(g && last && last.g===g){ last.ns.push(n); last.mr+=' '+mr; last.en+=' '+en; }
+  else units.push({g,ns:[n],mr,en,hl});
+});
+
+const deck=document.getElementById('deck'), prose=document.getElementById('prose'),
+      scroll=document.getElementById('scroll'), pips=document.getElementById('pips');
+document.getElementById('tmr').textContent=DATA.title_mr;
+document.getElementById('ten').textContent=DATA.title_en;
+const nMarked=units.filter(u=>u.hl).length;
+document.getElementById('ecount').textContent=nMarked+' marked';
+document.getElementById('tot').textContent=nMarked;
+
+const cards=[`<section class="card title-card" data-key="1">
+  <div class="big ui">01</div><div class="kicker">प्रवचन · 1 January</div>
+  <h1>${DATA.title_mr}</h1><p>${DATA.title_en}</p></section>`];
+units.forEach(u=>cards.push(
+ `<section class="card ${u.hl?'key':''}" data-key="${u.hl}" data-ns="${u.ns.join(',')}">
+    ${u.hl?`<div class="kicker">अधोरेखित · marked${u.ns.length>1?'<span class="joined">'+u.ns.length+' sentences</span>':''}</div>`:''}
+    <div class="mr">${u.mr}</div><div class="en">${u.en}</div>
+    <div class="tapme">tap for English</div></section>`));
+cards.push(`<section class="card" data-key="1" data-ns="fn">
+  <div class="kicker">तळटीप · footnote ${DATA.footnote.marker}</div>
+  <div class="mr" style="font-size:1.14rem">${DATA.footnote.mr}</div>
+  <div class="en">${DATA.footnote.en}</div><div class="tapme">tap for English</div></section>`);
+cards.push(`<section class="card end" data-key="1">
+  <div class="ring">॥</div><h2>सार · the essence</h2>
+  <ul>${DATA.points.map(([m,e])=>`<li><b>${m}</b>${e}</li>`).join('')}</ul></section>`);
+deck.innerHTML=cards.join('');
+
+prose.innerHTML = DATA.paras.map(([a,b])=>{
+  const ss=DATA.sentences.filter(s=>s[0]>=a&&s[0]<=b);
+  return '<p>'+ss.map(([n,mr,en,hl])=>`<span class="sn ${hl?'k':''}" data-n="${n}">${mr}</span> `).join('')+'</p>'
+       + '<p class="tr">'+ss.map(s=>s[2]).join(' ')+'</p>';
+}).join('');
+document.getElementById('fn').innerHTML=
+  `<i>${DATA.footnote.marker}.</i><span class="sn" data-n="fn">${DATA.footnote.mr}</span>
+   <span class="tr">${DATA.footnote.en}</span>`;
+
+/* ---------- deck <-> text ---------- */
+const glossTxt=document.getElementById('glossTxt');
+const vis=()=>[...deck.querySelectorAll('.card')].filter(c=>c.style.display!=='none');
+let idx=-1, lock=0;
+function setGloss(t){glossTxt.classList.add('swap');
+  setTimeout(()=>{glossTxt.textContent=t;glossTxt.classList.remove('swap')},180)}
+
+function sync(){
+  const list=vis(); if(!list.length) return;
+  const i=Math.max(0,Math.min(list.length-1,Math.round(deck.scrollTop/deck.clientHeight)));
+  list.forEach((c,j)=>{if(Math.abs(j-i)<2)c.classList.add('seen')});
+  pips.querySelectorAll('i').forEach((p,j)=>p.classList.toggle('on',j<=i));
+  if(i===idx) return; idx=i;
+  const card=list[i], ns=(card.dataset.ns||'').split(',').filter(Boolean);
+  document.body.classList.toggle('key',card.dataset.key==='1');
+  document.querySelectorAll('.sn.live').forEach(e=>e.classList.remove('live'));
+  let first=null;
+  ns.forEach(n=>{const e=document.querySelector(`.sn[data-n="${n}"]`);
+    if(e){e.classList.add('live'); first=first||e}});
+  if(first && !lock){ lock=1;
+    const r=first.getBoundingClientRect(), s=scroll.getBoundingClientRect();
+    scroll.scrollBy({top:r.top-s.top-s.height/2+r.height/2,behavior:'smooth'});
+    setTimeout(()=>lock=0,420);
+  }
+  const en=card.querySelector('.en');
+  setGloss(en?en.textContent.trim():(card.querySelector('p')?card.querySelector('p').textContent:'—'));
+  document.getElementById('hudR').textContent=(i+1)+' / '+list.length;
+  document.getElementById('cur').textContent=list.slice(0,i+1).filter(c=>c.dataset.key==='1'&&c.dataset.ns).length;
+  document.getElementById('meter').style.width=(i/(list.length-1)*100)+'%';
+}
+deck.addEventListener('scroll',sync,{passive:true});
+deck.addEventListener('click',e=>{const c=e.target.closest('.card');if(c)c.classList.toggle('reveal')});
+
+scroll.addEventListener('click',e=>{
+  const s=e.target.closest('.sn'); if(!s) return;
+  const list=vis(), j=list.findIndex(c=>(c.dataset.ns||'').split(',').includes(s.dataset.n));
+  if(j<0){ s.animate([{opacity:1},{opacity:.25},{opacity:1}],{duration:520}); return; }
+  lock=1; deck.scrollTo({top:j*deck.clientHeight,behavior:'smooth'}); setTimeout(()=>lock=0,700);
+});
+pips.addEventListener('click',e=>{const all=[...pips.children], j=all.indexOf(e.target);
+  if(j>=0) deck.scrollTo({top:j*deck.clientHeight,behavior:'smooth'})});
+
+/* ---------- controls ---------- */
+let only=true;
+function apply(){
+  deck.querySelectorAll('.card').forEach(c=>{c.style.display=(!only||c.dataset.key==='1')?'':'none'});
+  pips.innerHTML=vis().map(()=>'<i></i>').join('');
+  deck.scrollTop=0; idx=-1; sync();
+}
+document.getElementById('keyOnly').onclick=e=>{only=!only;e.target.classList.toggle('on',only);apply()};
+document.getElementById('revealAll').onclick=e=>{
+  const on=!deck.querySelector('.card.reveal');
+  deck.querySelectorAll('.card').forEach(c=>c.classList.toggle('reveal',on));
+  e.target.classList.toggle('on',on)};
+document.getElementById('trBtn').onclick=e=>{
+  const on=document.body.dataset.tr==='off';
+  document.body.dataset.tr=on?'on':'off'; e.target.classList.toggle('on',on)};
+
+addEventListener('keydown',e=>{
+  if(e.key==='t'||e.key==='T'){
+    setTheme(document.documentElement.dataset.theme==='day'?'night':'day'); return;}
+  if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return; e.preventDefault();
+  deck.scrollBy({top:(e.key==='ArrowDown'?1:-1)*deck.clientHeight,behavior:'smooth'})});
+
+const playBtn=document.getElementById('play'), playIcon=document.getElementById('playIcon'),
+      ring=playBtn.querySelector('circle'), C=2*Math.PI*16;
+ring.style.strokeDasharray=C; ring.style.strokeDashoffset=C;
+let timer=null,t=0; const DUR=7000;
+function stop(){clearInterval(timer);timer=null;t=0;ring.style.strokeDashoffset=C;
+  playBtn.classList.remove('on');playIcon.textContent='▶'}
+playBtn.onclick=()=>{
+  if(timer) return stop();
+  playBtn.classList.add('on'); playIcon.textContent='❚❚';
+  timer=setInterval(()=>{t+=100; ring.style.strokeDashoffset=C*(1-t/DUR);
+    if(t>=DUR){t=0;
+      if(idx>=vis().length-1){stop();deck.scrollTo({top:0,behavior:'smooth'})}
+      else deck.scrollBy({top:deck.clientHeight,behavior:'smooth'})}},100)};
+
+/* ---------- deep links: ?theme=day&card=4&marked=0&tr=on&reveal=1 ---------- */
+(function(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('theme')) setTheme(q.get('theme'));
+  if(q.get('marked')==='0'){ only=false; document.getElementById('keyOnly').classList.remove('on'); }
+  if(q.get('tr')==='on'){ document.body.dataset.tr='on'; document.getElementById('trBtn').classList.add('on'); }
+  apply();
+  if(q.get('reveal')==='1'){ deck.querySelectorAll('.card').forEach(c=>c.classList.add('reveal'));
+    document.getElementById('revealAll').classList.add('on'); }
+  const c=parseInt(q.get('card'),10);
+  if(!isNaN(c)) requestAnimationFrame(()=>{
+    deck.scrollTop=c*deck.clientHeight; deck.dispatchEvent(new Event('scroll'));
+    deck.querySelectorAll('.card').forEach(x=>x.classList.add('seen')); });
+})();
+</script>
+</body>
+</html>

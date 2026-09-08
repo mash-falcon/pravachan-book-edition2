@@ -1,0 +1,12 @@
+# Page scans are kept out of git while the rights position is unconfirmed.
+# See RIGHTS.md. Remove these lines once that is settled.
+source/pages/*.jpg
+source/pages/*.jpeg
+source/pages/*.png
+source/pages/*.tif
+source/pages/*.tiff
+!source/pages/README.md
+
+.DS_Store
+__pycache__/
+*.pyc

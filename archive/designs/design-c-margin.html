@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design C — The Margin Edition</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="day"]{
+  --paper:#fbf8f1;--ink:#26221c;--soft:#6f665a;--rule:#e0d6c2;--faint:#a4998a;--ghost:#b3a897;
+  --gold:#b8892f;--wash:#f6ecd8;--gold-line:rgba(184,137,47,.55);--gold-tint:rgba(246,236,216,.9);
+  --desk-a:#efe9dc;--desk-b:#e4dccc;--desk-c:#ded5c3;--sheet-bd:#e6dcc8;--chip:#fdfbf6;
+  --stripe-a:#faf6ee;--stripe-b:#f6f1e6;--head:#4d453b;--body-soft:#7d7161;
+  --shadow:0 2px 4px rgba(70,55,30,.05),0 24px 60px -24px rgba(70,55,30,.28);
+  --edge-sheen:linear-gradient(90deg,rgba(0,0,0,.035),transparent 6%,transparent 94%,rgba(0,0,0,.02))}
+[data-theme="night"]{
+  --paper:#15130f;--ink:#e9e1d3;--soft:#9a9082;--rule:#2c261f;--faint:#6a6154;--ghost:#584f44;
+  --gold:#d2a058;--wash:#2b2113;--gold-line:rgba(210,160,88,.6);--gold-tint:rgba(60,45,24,.55);
+  --desk-a:#0f0d0b;--desk-b:#0b0a08;--desk-c:#080706;--sheet-bd:#2a241d;--chip:#1b1712;
+  --stripe-a:#191510;--stripe-b:#141109;--head:#c7bdad;--body-soft:#8b8173;
+  --shadow:0 2px 4px rgba(0,0,0,.4),0 30px 70px -26px rgba(0,0,0,.8);
+  --edge-sheen:linear-gradient(90deg,rgba(255,255,255,.035),transparent 6%,transparent 94%,rgba(255,255,255,.02))}
+*{box-sizing:border-box}
+[hidden]{display:none!important}   /* a display: rule otherwise beats the hidden attribute */
+body{margin:0;transition:background .45s,color .45s;background:
+  radial-gradient(60% 60% at 50% 0%,var(--desk-a) 0%,var(--desk-b) 60%,var(--desk-c) 100%);
+  color:var(--ink);font-family:'EB Garamond',Georgia,serif;font-size:18px;
+  -webkit-font-smoothing:antialiased;padding:2.5rem 1.5rem 5rem}
+.ui{font-family:'Inter',system-ui,sans-serif}
+
+.toolbar{max-width:64rem;margin:0 auto 1.75rem;display:flex;align-items:center;gap:.5rem}
+.toolbar .t{font-family:'Inter',sans-serif;font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;color:var(--soft)}
+.grow{flex:1}
+.btn{font-family:'Inter',sans-serif;font-size:.7rem;font-weight:500;color:var(--soft);background:var(--chip);
+  border:1px solid var(--rule);border-radius:7px;padding:.4rem .75rem;cursor:pointer;transition:.2s}
+.btn:hover{border-color:var(--gold);color:var(--gold)}
+.btn.on{background:var(--gold);border-color:var(--gold);color:#fff}
+
+/* the sheet */
+.sheet{max-width:64rem;margin:0 auto;background:var(--paper);border:1px solid var(--sheet-bd);border-radius:3px;
+  box-shadow:var(--shadow);position:relative;padding:4.5rem 4rem 3.5rem}
+.sheet::before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:3px;
+  background:var(--edge-sheen)}
+.runhead{position:absolute;top:1.6rem;left:4rem;right:4rem;display:flex;justify-content:space-between;
+  font-family:'Inter',sans-serif;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--faint)}
+
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 15rem;gap:3rem;position:relative}
+@media(max-width:880px){.grid{grid-template-columns:1fr}.sheet{padding:3rem 1.5rem}}
+
+h1{font-family:'Tiro Devanagari Marathi',serif;font-weight:400;font-size:2.15rem;line-height:1.4;
+  margin:0 0 .3rem;letter-spacing:.005em}
+.sub{font-style:italic;color:var(--soft);margin:0 0 .35rem;font-size:1.02rem}
+.dl{font-family:'Inter',sans-serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:2.4rem}
+.rule{height:1px;background:linear-gradient(90deg,var(--rule),transparent);margin:0 0 2.2rem}
+
+.body{font-family:'Tiro Devanagari Marathi',serif;line-height:2.15;text-align:justify;
+  text-justify:inter-word;hyphens:none}
+.body p{margin:0 0 1.4rem;text-indent:1.6em}
+.body p:first-of-type{text-indent:0}
+/* Devanagari has no safe drop cap — ::first-letter shears the akshara apart.
+   A raised first-word versal is the correct Indic equivalent. */
+.versal{font-size:1.95em;line-height:1;color:var(--gold);letter-spacing:.005em;
+  padding-right:.12em;vertical-align:-.06em}
+.s{transition:background .3s}
+/* printed underline, faithfully: a fine rule under the line, gold not black */
+.hl{box-shadow:inset 0 -1px 0 0 var(--gold-line);background:linear-gradient(180deg,transparent 70%,var(--gold-tint) 70%)}
+.hl.lit{background:var(--wash);box-shadow:inset 0 -1px 0 0 var(--gold)}
+sup.m{font-family:'Inter',sans-serif;font-size:.55em;color:var(--gold);font-weight:600;
+  vertical-align:super;margin-left:.15em;cursor:pointer}
+body[data-marks="off"] .hl{box-shadow:none;background:none}
+body[data-marks="off"] sup.m{display:none}
+
+/* marginalia */
+.margin{position:relative;font-family:'Inter',system-ui,sans-serif}
+.note{position:absolute;left:0;width:100%;padding-left:1.1rem;border-left:1px solid var(--rule);
+  transition:.35s;cursor:pointer}
+.note::before{content:"";position:absolute;left:-1px;top:.15rem;height:1.35rem;width:2px;background:var(--gold)}
+.note .n{font-size:.58rem;letter-spacing:.16em;color:var(--gold);font-weight:600;display:block;margin-bottom:.3rem}
+.note .en{font-family:'EB Garamond',serif;font-size:.92rem;line-height:1.5;color:var(--soft)}
+.note:hover .en,.note.lit .en{color:var(--ink)}
+.note.lit{border-left-color:var(--gold)}
+@media(max-width:880px){.margin{display:none}}
+
+/* facsimile drawer */
+.fax{max-width:64rem;margin:1.25rem auto 0;background:var(--chip);border:1px solid var(--rule);border-radius:3px;
+  padding:1.1rem 1.35rem;display:none;box-shadow:var(--shadow)}
+.fax.show{display:block}
+.fax h4{font-family:'Inter',sans-serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);margin:0 0 .6rem}
+.fax p{margin:0;font-size:.9rem;color:var(--soft);line-height:1.6}
+.faxwrap{margin-top:1rem;text-align:center}
+.faxwrap img{max-width:100%;max-height:78vh;border:1px solid var(--rule);border-radius:2px;
+  box-shadow:var(--shadow);background:#fff}
+/* the scan is a photographic light object — soften it, never invert it, in night mode */
+[data-theme="night"] .faxwrap img{filter:brightness(.82) sepia(.10)}
+.slot{margin-top:.9rem;height:9rem;border:1px dashed var(--rule);border-radius:3px;display:grid;place-items:center;
+  color:var(--ghost);font-family:'Inter',sans-serif;font-size:.72rem;background:
+  repeating-linear-gradient(135deg,var(--stripe-a),var(--stripe-a) 8px,var(--stripe-b) 8px,var(--stripe-b) 16px)}
+
+.colophon{max-width:64rem;margin:1.5rem auto 0;color:var(--body-soft);font-size:.92rem;line-height:1.65}
+.colophon h3{font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--head);margin:0 0 .7rem}
+.colophon b{color:var(--gold);font-weight:500}
+.foot{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--rule);font-size:.85rem;color:var(--soft)}
+.foot .num{color:var(--gold);font-weight:600;margin-right:.35rem;font-family:'Inter',sans-serif}
+.folio{text-align:center;margin-top:2.2rem;color:var(--ghost);font-family:'Inter',sans-serif;font-size:.7rem;letter-spacing:.2em}
+
+/* paper is always paper — never print the night palette */
+@media print{
+  [data-theme]{--paper:#fff;--ink:#1c1913;--soft:#544c42;--rule:#d8cdb8;--faint:#8b8071;--ghost:#9a9082;
+    --gold:#8a6620;--wash:#f6ecd8;--gold-line:rgba(138,102,32,.7);--gold-tint:rgba(246,236,216,.9);
+    --sheet-bd:#fff;--shadow:none;--edge-sheen:none}
+  body{background:#fff;padding:0}
+  .toolbar,.fax,.colophon{display:none}
+  .sheet{box-shadow:none;border:0;max-width:none;padding:0}
+}
+</style>
+</head>
+<body data-marks="on">
+
+<div class="toolbar ui">
+  <span class="t">Design C — The Margin Edition</span>
+  <span class="grow"></span>
+  <button class="btn" id="bTheme">☾ Night</button>
+  <button class="btn on" id="bMarks">Underlines</button>
+  <button class="btn" id="bFax">Facsimile</button>
+  <button class="btn" id="bPrint">Print / PDF</button>
+</div>
+
+<div class="sheet">
+  <div class="runhead"><span>प्रवचने · Pravachane</span><span>जानेवारी</span></div>
+  <div class="grid">
+    <section>
+      <div class="dl ui" id="dl"></div>
+      <h1 id="tmr"></h1>
+      <p class="sub" id="ten"></p>
+      <div class="rule"></div>
+      <div class="body" id="body"></div>
+      <div class="foot" id="foot"></div>
+      <div class="folio">— १ —</div>
+    </section>
+    <aside class="margin" id="margin"></aside>
+  </div>
+</div>
+
+<div class="fax" id="fax">
+  <h4>Facsimile · मूळ पान</h4>
+  <p>The scanned page beside the set text, so a reader can always check the original —
+  the thing that makes a devotional reprint trustworthy. The hand underlines visible here are
+  the ones carried into the typeset page as gold rules and numbered marginalia.</p>
+  <div class="faxwrap">
+    <img id="faxImg" src="source/Edn2_Jan01.JPG" alt="Scanned original of the 1 January page">
+    <div class="slot" id="faxSlot" hidden>source/Edn2_Jan01.JPG — not found</div>
+  </div>
+</div>
+
+<div class="colophon">
+  <h3>What this design does</h3>
+  <p>The <b>printed page, done properly</b>: justified Devanagari at a generous 2.15 leading, a gold drop cap,
+  running heads, folio, and the footnote kept where the book put it. Nothing is app-like — it is a book that happens to be on a screen.</p>
+  <p style="margin-top:.9rem">The underlines are treated as <b>editorial apparatus rather than decoration</b>. Each marked passage keeps a fine
+  gold rule and a superscript number, and its English lifts out into the margin, <b>vertically aligned to the exact line it glosses</b>.
+  Hover either side and both light up. This is how a scholarly edition handles a gloss, and it means the translation never interrupts the Marathi.</p>
+  <p style="margin-top:.9rem">Because the layout is real print geometry, <b>Print / PDF gives you a genuine book page</b> —
+  the same file produces the screen edition and the paper edition, which matters if you ever reprint.</p>
+</div>
+
+<script>
+const DATA = {
+  date:{label_mr:"१ जानेवारी", label_en:"1 January"},
+  title_mr:"परमात्मस्वरूपच असणारें नाम",
+  title_en:"The Name That Is Itself the Supreme Reality",
+  footnote:{marker:"१", mr:"ज्याची प्रत्येक कृति रामाच्या स्मरणामध्यें होते तोच रामराज्यांत खरा राहतो.",
+            en:"He whose every act is done in remembrance of Rama is the one who truly dwells in Rama's kingdom."},
+  paras:[[1,10],[11,15],[16,19],[20,23]],
+  sentences:[
+ [1,"नाम म्हणजे भगवंताचें नांव.","“Nama” means the Name of God.",0],
+ [2,"देवाच्या कोणत्याहि नांवांत फरक नाहीं.","There is no difference between any of God’s names.",0],
+ [3,"नाम हा जीव आणि शिव यांमधील दुवा आहे.","The Name is the link between the individual soul and God.",1],
+ [4,"नाम हें साध्य आहे व साधनहि आहे.","The Name is both the goal and the means to it.",1],
+ [5,"नाम सगुण आहे आणि निर्गुणहि आहे.","The Name is saguna — with form and attributes — and also nirguna, the formless.",1],
+ [6,"नामाचा आरंभ सगुणांत आहे व शेवट निर्गुणांत आहे.","The Name begins in the saguna and ends in the nirguna.",1],
+ [7,"आरंभ सगुणांत आहे असें म्हणण्याचें कारण हें कीं, भगवंत मुळांत जो निराकार, निर्गुण आहे, तो जेव्हां सगुणांत आला तेव्हांच त्याला नाम-रूप लागलें;","It is said to begin in the saguna because God, originally formless and without attributes, acquired name and form only when He assumed a manifest form;",1],
+ [8,"व सगुणरूप नाहींसें झालें तरी नाम शिल्लकच राहिलें, म्हणून तें निर्गुणहि आहे.","and even when that form dissolves, the Name remains — which is why it is nirguna as well.",1],
+ [9,"तेव्हां सगुण किंवा निर्गुण भक्तीला नामाचाच आधार आहे.","So whether devotion is to the formed or the formless, its support is the Name alone.",0],
+ [10,"नाम हा सत्संगाचा पाया आहे व कळसहि आहे.","The Name is both the foundation of satsang and its crowning pinnacle.",0],
+ [11,"नाम म्हणजे आपली वृत्ति आणि भगवंत यांना जोडणारी सांखळीच आहे.","The Name is the very chain that joins our inner disposition to God.",1],
+ [12,"लग्न झाल्यावर स्त्री जशी नवऱ्याशीं एकरूप होऊन जाते, त्याप्रमाणें वृत्तीचें नामाशीं लग्न होऊन ती नामरूप बनली पाहिजे.","Just as a wife becomes one with her husband after marriage, our disposition must be wedded to the Name until it takes the Name’s own form.",1],
+ [13,"अन्नाला स्वतःची चव असते; त्याच्यामध्यें आपण आपली गोडी व आवड घालून नंतर तें आपण खातों.","Food has a taste of its own; we add our own relish and liking to it and then eat it.",1],
+ [14,"पण नामाला स्वतःची अशी चव नाहीं. त्याच्यामध्यें आपणच आपली गोडी घालून तें घेतलें पाहिजे.","But the Name has no such taste of its own. We ourselves must put our sweetness into it and then take it.",0],
+ [15,"आपण जितकी जास्त गोडी त्यामध्यें घालूं तितकें तें अधिक गोड वाटेल.","The more sweetness we pour into it, the sweeter it will taste.",0],
+ [16,"पंढरपूरला जाण्यास पुष्कळ रस्ते आहेत; परंतु सर्वांना शेवटीं “बारींतून” जाऊनच देवदर्शन घ्यावें लागतें.","There are many roads to Pandharpur; but in the end everyone must pass through the same narrow queue to have darshan of God.",0],
+ [17,"त्याप्रमाणें, इतर साधनें जरी केलीं तरी नामसाधन केल्यावरच आत्मस्वरूपाची प्राप्ति होते.","In the same way, whatever other practices one may follow, realisation of one’s true Self comes only through the practice of the Name.",1],
+ [18,"आपण नाम घ्यावें, तें आपणच आपल्या कानांनीं ऐकावें, आणि तें घेतां घेतां त्यांत शेवटीं स्वतःला विसरून जावें, हाच नामसाधनेंतील आनंदाचा मार्ग आहे.","Take the Name, hear it with your own ears, and while taking it, at last forget yourself in it — this is the path of joy in the practice of the Name.",1],
+ [19,"जसें आपलें आपलेपण आपल्या नांवांत आहे, तसें देवाचें देवपण त्याच्या नामांत आहे.","Just as our own selfhood lives in our name, so God’s godhood lives in His Name.",1],
+ [20,"आपण आज जें नाम घेतों तेंच नाम कायम राहतें; परंतु आपली देहबुद्धि जसजशी कमी होईल तसतसें तें नाम व्यापक व अर्थगर्भ बनत जातें, आणि शेवटीं नाम हें परमात्मस्वरूपच आहे असा अनुभव येतो.","The Name we take today stays the same; but as body-consciousness thins, that Name grows vaster and more laden with meaning, until at last one experiences that the Name is itself the Supreme Reality.",0],
+ [21,"पाणी हें जसें शरीराचें जीवन आहे, तसें नाम हें मनाचें “जीवन” बनलें पाहिजे.","As water is the life of the body, so must the Name become the “life” of the mind.",1],
+ [22,"अंतकाळीं अगदीं शेवटीं सुटणारी वस्तु म्हणजे भगवंताचें नाम पाहिजे. नामांत शेवटचा श्वास गेला पाहिजे.","At the end of life, the very last thing to leave us should be God’s Name. The final breath should go out in the Name.",1],
+ [23,"नामांत एका आनंदाशिवाय दुसरें कांहीं नाहीं.","In the Name there is nothing but bliss.",0]
+  ],
+  points:[
+   ["नाम = साध्य + साधन","Both the road and the destination — nothing further is needed.",4],
+   ["जीव–शिव दुवा","The link between soul and God; the chain that binds your disposition to Him.",3],
+   ["सगुण ते निर्गुण","Arises with form, survives when form dissolves — so it serves every devotion.",6],
+   ["गोडी आपणच घालायची","The Name has no taste of its own; what you put in is what you taste.",13],
+   ["“बारीं”शिवाय दर्शन नाही","Many roads, one gate — realisation comes through the Name.",17],
+   ["घ्या · ऐका · विसरा","Say it, hear it yourself, lose yourself in it.",18],
+   ["मनाचें जीवन","As water is the life of the body, the Name is the life of the mind.",21],
+   ["शेवटचा श्वास नामांत","Let the Name be the last thing to leave you.",22]
+  ]
+};
+</script>
+<script>
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+document.getElementById('dl').textContent=DATA.date.label_mr+'  ·  '+DATA.date.label_en;
+document.getElementById('tmr').textContent=DATA.title_mr;
+document.getElementById('ten').textContent=DATA.title_en;
+document.getElementById('foot').innerHTML=
+  `<span class="num">${DATA.footnote.marker}.</span>${esc(DATA.footnote.mr)}
+   <em style="display:block;margin-top:.3rem;font-family:'EB Garamond',serif">${esc(DATA.footnote.en)}</em>`;
+
+/* an underline that runs across two sentences is ONE passage, so it carries one
+   marginal note and one number — matching the deck in Design B */
+const GROUP={5:1,6:1,7:2,8:2,11:3,12:3};
+const units=[];
+DATA.sentences.forEach(([n,mr,en,hl])=>{
+  const g=GROUP[n], last=units[units.length-1];
+  if(g && last && last.g===g){ last.ns.push(n); last.en+=' '+en; }
+  else units.push({g,ns:[n],en,hl});
+});
+const marked=units.filter(u=>u.hl);
+const numOf={}, lastOf={};              // sentence -> passage number / is it the group's last
+marked.forEach((u,i)=>{ u.ns.forEach(n=>numOf[n]=i+1); lastOf[u.ns[u.ns.length-1]]=true; });
+
+document.getElementById('body').innerHTML = DATA.paras.map(([a,b])=>
+  '<p>'+DATA.sentences.filter(s=>s[0]>=a&&s[0]<=b).map(([n,mr,en,hl])=>{
+    const sup = (hl && lastOf[n]) ? `<sup class="m" data-p="${numOf[n]}">${numOf[n]}</sup>` : '';
+    let t = esc(mr);
+    if(n===1) t = t.replace(/^(\S+)/,'<span class="versal">$1</span>');
+    return `<span class="s ${hl?'hl':''}" data-n="${n}" data-p="${numOf[n]||''}">${t}</span>${sup} `;
+  }).join('')+'</p>').join('');
+
+document.getElementById('margin').innerHTML = marked.map((u,i)=>
+  `<div class="note" data-n="${u.ns[0]}" data-p="${i+1}"><span class="n">${i+1}</span>
+   <div class="en">${esc(u.en)}</div></div>`).join('');
+
+function place(){
+  const gridTop=document.querySelector('.grid').getBoundingClientRect().top+scrollY;
+  let last=-999;
+  document.querySelectorAll('.note').forEach(note=>{
+    const src=document.querySelector(`.s[data-n="${note.dataset.n}"]`);
+    const r=src.getClientRects()[0]; if(!r) return;
+    let y=r.top+scrollY-gridTop;
+    if(y<last+14) y=last+14;            // never let two notes collide
+    last=y+note.offsetHeight;
+    note.style.top=y+'px';
+  });
+  document.querySelector('.margin').style.minHeight=(last+40)+'px';
+}
+addEventListener('load',place); addEventListener('resize',place); setTimeout(place,600);
+
+/* light the whole passage, both sentences of it, and its note together */
+function link(p,on){
+  if(!p) return;
+  document.querySelectorAll(`.s[data-p="${p}"],.note[data-p="${p}"]`)
+    .forEach(e=>e.classList.toggle('lit',on));
+}
+document.addEventListener('mouseover',e=>{const t=e.target.closest('.note,.hl,sup.m');if(t)link(t.dataset.p,true)});
+document.addEventListener('mouseout', e=>{const t=e.target.closest('.note,.hl,sup.m');if(t)link(t.dataset.p,false)});
+document.getElementById('margin').addEventListener('click',e=>{const n=e.target.closest('.note');
+  if(n)document.querySelector(`.s[data-n="${n.dataset.n}"]`).scrollIntoView({behavior:'smooth',block:'center'})});
+
+document.getElementById('bMarks').onclick=e=>{
+  const off=document.body.dataset.marks==='on';
+  document.body.dataset.marks=off?'off':'on'; e.target.classList.toggle('on',!off);};
+document.getElementById('bFax').onclick=e=>{
+  document.getElementById('fax').classList.toggle('show'); e.target.classList.toggle('on');};
+document.getElementById('bPrint').onclick=()=>print();
+/* if the scan is missing, say so instead of showing a broken image */
+document.getElementById('faxImg').onerror=function(){
+  this.hidden=true; document.getElementById('faxSlot').hidden=false; };
+
+/* ---------- theme: follows the OS, remembers your choice ---------- */
+const KEY='pravachane-theme', tb=document.getElementById('bTheme');
+/* localStorage throws in sandboxed / data: / blocked-cookie contexts — never let it break the page */
+const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},
+             set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+function setTheme(t){
+  document.documentElement.dataset.theme=t;
+  tb.textContent = t==='night' ? '☀ Day' : '☾ Night';
+  tb.classList.toggle('on',t==='night');
+  store.set(KEY,t);
+}
+setTheme(store.get(KEY) ||
+  (matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'));
+tb.onclick=()=>setTheme(document.documentElement.dataset.theme==='night'?'day':'night');
+addEventListener('keydown',e=>{if(e.key==='t'||e.key==='T')tb.click()});
+
+/* deep links: ?theme=night&marks=off&lit=3&fax=1 */
+(function(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('theme')) setTheme(q.get('theme'));
+  if(q.get('marks')==='off') document.getElementById('bMarks').click();
+  if(q.get('fax')==='1') document.getElementById('bFax').click();
+  if(q.get('lit')) setTimeout(()=>link(q.get('lit'),true),700);
+})();
+</script>
+</body>
+</html>
