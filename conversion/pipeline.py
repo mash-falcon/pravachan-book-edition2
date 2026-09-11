@@ -60,7 +60,23 @@ def art(work: pathlib.Path, name: str) -> pathlib.Path:
     return work / name
 
 
+def rel(p: pathlib.Path) -> str:
+    """Path for display. --work can be relative or outside the repo, and
+    Path.relative_to raises rather than falling back."""
+    p = pathlib.Path(p).resolve()
+    return str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p)
+
+
+NEEDS = {"1-transcript.json": "transcribe", "2-english.json": "translate",
+         "3-marks.json": "marks", "4-day.json": "merge"}
+
+
 def load(p: pathlib.Path):
+    if not p.exists():
+        stage = NEEDS.get(p.name, "an earlier stage")
+        sys.exit(f"{rel(p)} is missing.\n"
+                 f"It is produced by the `{stage}` stage — run that first, or drop the\n"
+                 f"--from/--only flag so the earlier stages run too.")
     return json.loads(p.read_text(encoding="utf-8"))
 
 
@@ -74,7 +90,7 @@ def save(p: pathlib.Path, obj, cfg=None, how=None) -> None:
             "at": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
         }}
     p.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"    wrote {p.relative_to(ROOT) if p.is_relative_to(ROOT) else p}")
+    print(f"    wrote {rel(p)}")
 
 
 def describe(p: pathlib.Path) -> str:
@@ -100,7 +116,7 @@ def stage_transcribe(cfg, work):
     footer = ["", f'[footnote {r.get("footnote",{}).get("marker","")}] '
                   f'{r.get("footnote",{}).get("mr","")}']
     out_t.write_text("\n".join(header + lines + footer), encoding="utf-8")
-    print(f"    wrote {out_t.relative_to(ROOT)}  ({len(lines)} sentences)")
+    print(f"    wrote {rel(out_t)}  ({len(lines)} sentences)")
 
 
 def stage_translate(cfg, work):
@@ -112,7 +128,7 @@ def stage_translate(cfg, work):
     save(art(work, "2-english.json"), r, cfg)
     art(work, "2-english.txt").write_text(
         "\n".join(f'{s["n"]}. {s["en"]}' for s in r.get("sentences", [])), encoding="utf-8")
-    print(f"    wrote {art(work,'2-english.txt').relative_to(ROOT)}")
+    print(f"    wrote {rel(art(work,'2-english.txt'))}")
 
 
 def stage_marks(cfg, work):
@@ -169,7 +185,7 @@ def stage_merge(cfg, work):
     dest = ROOT / "content" / "days" / f"{cfg['id']}.json"
     if cfg["promote"]:
         shutil.copyfile(art(work, "4-day.json"), dest)
-        print(f"    copied to {dest.relative_to(ROOT)}  (--promote)")
+        print(f"    copied to {rel(dest)}  (--promote)")
     else:
         print(f"    NOT copied to content/days/ — pass --promote once you have read it")
 
@@ -204,7 +220,7 @@ def stage_render(cfg, work):
     dest = ROOT / "content" / "days" / f"{cfg['id']}.json"
     if not dest.exists():
         shutil.copyfile(src, dest)
-        print(f"    staged {dest.relative_to(ROOT)} for rendering")
+        print(f"    staged {rel(dest)} for rendering")
     s = art(work, "5-summary.json")
     if s.exists() and "…" not in s.read_text(encoding="utf-8"):
         shutil.copyfile(s, ROOT / "summary" / "days" / f"{cfg['id']}.json")
@@ -249,7 +265,7 @@ def main() -> None:
     image = pathlib.Path(a.image).expanduser().resolve()
     if not image.exists():
         sys.exit(f"{image} not found")
-    work = pathlib.Path(a.work) if a.work else ROOT / "work" / a.id
+    work = (pathlib.Path(a.work) if a.work else ROOT / "work" / a.id).expanduser().resolve()
     work.mkdir(parents=True, exist_ok=True)
 
     cfg = {"id": a.id, "image": image, "base_url": a.base_url, "model": a.model,
@@ -262,7 +278,7 @@ def main() -> None:
     if not staged.exists():
         staged.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(image, staged)
-        print(f"staged scan at {staged.relative_to(ROOT)}")
+        print(f"staged scan at {rel(staged)}")
 
     if a.only:
         todo = [a.only]
@@ -287,7 +303,7 @@ def main() -> None:
     if len(skipped) >= len([t for t in todo if ARTIFACT[t]]):
         print("\nNO MODEL WAS CALLED — every stage reused an existing artifact.")
         print(f"To actually run {a.model}:  --force   (or --work <fresh dir>)")
-    print(f"\nartifacts in {work.relative_to(ROOT)}/")
+    print(f"\nartifacts in {rel(work)}/")
     for f in sorted(work.iterdir()):
         print(f"  {f.name}")
 
