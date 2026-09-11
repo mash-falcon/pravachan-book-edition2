@@ -89,7 +89,8 @@ def main() -> None:
     ap.add_argument("--prompt", help="send this instead of the transcription prompt")
     ap.add_argument("--max-tokens", type=int, default=8192,
                     help="Devanagari is token-hungry; 1024 truncates a full page")
-    ap.add_argument("--temperature", type=float, default=0.0)
+    ap.add_argument("--temperature", type=float, default=None,
+                    help="omitted unless given; not every model accepts it")
     a = ap.parse_args()
 
     if a.image:
@@ -108,31 +109,46 @@ def main() -> None:
     if media_type is None:
         sys.exit(f"unsupported image type {image.suffix} (jpg, png, gif, webp)")
 
-    prompt = a.prompt
+    prompt, prompt_src = a.prompt, "custom (--prompt)"
     if prompt is None:
-        p = HERE / "prompts" / "transcribe.md"
-        prompt = p.read_text(encoding="utf-8") if p.exists() else FALLBACK_PROMPT
+        pf = HERE / "prompts" / "transcribe.md"
+        if pf.exists():
+            prompt, prompt_src = pf.read_text(encoding="utf-8"), str(pf)
+        else:
+            prompt, prompt_src = FALLBACK_PROMPT, "built-in fallback (no prompts/ beside this file)"
 
     b64 = base64.standard_b64encode(image.read_bytes()).decode()
     client = anthropic.Anthropic()          # reads ANTHROPIC_API_KEY
 
     print(f"model  : {a.model}")
     print(f"image  : {image}  ({image.stat().st_size/1024:.0f} KB, {media_type})")
-    print(f"prompt : {'custom' if a.prompt else 'conversion/prompts/transcribe.md'}")
+    print(f"prompt : {prompt_src}")
     print(f"limit  : max_tokens {a.max_tokens}\n")
+
+    kwargs = {
+        "model": a.model,
+        "max_tokens": a.max_tokens,
+        "messages": [{"role": "user", "content": [
+            {"type": "text", "text": prompt},
+            {"type": "image", "source": {"type": "base64",
+                                         "media_type": media_type, "data": b64}},
+        ]}],
+    }
+    if a.temperature is not None:
+        kwargs["temperature"] = a.temperature
 
     t0 = time.time()
     try:
-        msg = client.messages.create(
-            model=a.model,
-            max_tokens=a.max_tokens,
-            temperature=a.temperature,
-            messages=[{"role": "user", "content": [
-                {"type": "text", "text": prompt},
-                {"type": "image", "source": {"type": "base64",
-                                             "media_type": media_type, "data": b64}},
-            ]}],
-        )
+        try:
+            msg = client.messages.create(**kwargs)
+        except TypeError as e:
+            # Not every SDK version and model accepts temperature. Losing it costs
+            # a little determinism; failing the whole run costs the run.
+            if "temperature" not in str(e):
+                raise
+            print("  note: this SDK/model rejects `temperature` — retrying without it")
+            kwargs.pop("temperature", None)
+            msg = client.messages.create(**kwargs)
     except anthropic.APIStatusError as e:
         sys.exit(f"HTTP {e.status_code}: {e.message}")
     except anthropic.APIConnectionError as e:
@@ -148,20 +164,19 @@ def main() -> None:
     if msg.stop_reason == "max_tokens":
         print("  TRUNCATED — the page did not fit. Re-run with a larger --max-tokens.")
 
-    out = ROOT / "content" / "drafts" / "probes"
-    if out.parent.exists():
-        out.mkdir(parents=True, exist_ok=True)
-        slug = re.sub(r"[^A-Za-z0-9._-]+", "_", a.model).strip("_")
-        dest = out / f"{a.day or image.stem}__{slug}__anthropic.txt"
-        dest.write_text(text, encoding="utf-8")
-    else:
-        dest = None
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "_", a.model).strip("_")
+    name = f"{a.day or image.stem}__{slug}__anthropic.txt"
+    if (HERE / "prompts").exists():                  # running inside the repo
+        dest = ROOT / "content" / "drafts" / "probes" / name
+        dest.parent.mkdir(parents=True, exist_ok=True)
+    else:                                            # standalone: write beside you
+        dest = pathlib.Path.cwd() / name
+    dest.write_text(text, encoding="utf-8")
 
     print("\n" + "-" * 78)
     print(text[:3000] + ("\n… (truncated for display)" if len(text) > 3000 else ""))
     print("-" * 78)
-    if dest:
-        print(f"full response: {dest.relative_to(ROOT)}")
+    print(f"full response: {dest}")
 
     body = re.sub(r"```(?:json)?|```", "", text).strip()
     try:
