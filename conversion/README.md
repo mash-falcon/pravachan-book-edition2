@@ -85,6 +85,34 @@ the exact inverse for a modernised one.
 Note it counts **whole words**, not substrings — ते is inside होते and तेव्हां, हे is
 inside आहे, so substring counting flags a perfectly faithful page as modernised.
 
+### Against the Anthropic API directly
+
+`probe.py` speaks the OpenAI-compatible shape. The Anthropic Messages API formats
+images differently, so there is a separate standalone script for it:
+
+```bash
+pip install anthropic
+export ANTHROPIC_API_KEY=sk-ant-...
+python3 conversion/probe_anthropic.py --day 01-01 --model claude-sonnet-5
+```
+
+It imports nothing from this repo — copy the single file anywhere and it still runs,
+falling back to a built-in transcription prompt if `prompts/transcribe.md` is absent.
+
+Note the two request shapes differ:
+
+| | image block |
+|---|---|
+| OpenAI-compatible | `{"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,…"}}` |
+| Anthropic | `{"type": "image", "source": {"type": "base64", "media_type": …, "data": …}}` |
+
+Claude models reached **through the NVIDIA gateway** (`aws/anthropic/…`,
+`azure/anthropic/…`) use the OpenAI-compatible shape — use `probe.py` for those.
+This script is only for `api.anthropic.com`.
+
+It is also the one place in this repo that needs a pip install. Everything else is
+standard library.
+
 ### max_tokens
 
 A full page of Devanagari does not fit in 1024 tokens. The default here is **8192**,
