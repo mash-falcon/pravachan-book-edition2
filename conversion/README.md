@@ -21,6 +21,17 @@ output needs correcting and the corrections must survive:
 | `work/<id>/4-day.json` | everything merged — the file the readers read |
 | `work/<id>/5-summary.json` | the summary essay and the day's practice |
 
+Every artifact records **who made it and when**, and a skipped stage prints that:
+
+```
+[transcribe] skipped — 1-transcript.json already exists
+          made by anthropic:claude-sonnet-5 at 2026-09-11T14:02:18+05:30
+```
+
+If a run skips every stage it says **NO MODEL WAS CALLED** rather than letting a
+rendered page imply one was. An artifact from another source reports
+`origin UNRECORDED`.
+
 Re-running skips any stage whose artifact already exists, so fixing
 `1-transcript.mr.txt` by hand and re-running costs nothing:
 
