@@ -1,0 +1,140 @@
+{
+  "id": "01-02",
+  "date": {
+    "day": 2,
+    "month": 1,
+    "label_mr": "२ जानेवारी",
+    "label_en": "2 January"
+  },
+  "title_mr": "सद्गुरूकडून घेतलेलें नाम",
+  "title_en": "The Name Received from the Sadguru",
+  "source": {
+    "page_image": "source/pages/01-02.jpg",
+    "orthography": "original",
+    "transcribed_by": "MODEL:claude-sonnet-5",
+    "transcription_reviewed_by": null,
+    "translation_by": "MODEL:claude-opus-5",
+    "translation_reviewed": false,
+    "paragraph_breaks": "GUESSED — not read off the scan"
+  },
+  "marks": {
+    "kind": "inherited",
+    "by": "an unidentified previous reader of this copy",
+    "count_passages": 0,
+    "detected_by": null,
+    "confirmed_by_human": false,
+    "note": "Nobody has read the scan for underlines yet."
+  },
+  "paras": [
+    [
+      1,
+      6
+    ],
+    [
+      7,
+      9
+    ],
+    [
+      10,
+      14
+    ]
+  ],
+  "sentences": [
+    {
+      "n": 1,
+      "mr": "नाम हें सद्गुरूकडूनच घेणें जरूर आहे कां ? किंवा तें आपणच आपल्या आवडीप्रमाणें घेतलें तरी चालेल कां ?",
+      "en": "Is it necessary to receive the Name from a Sadguru? Or will it do to take it up oneself, according to one's own liking?",
+      "highlight": 0
+    },
+    {
+      "n": 2,
+      "mr": "भगवंताचें नांव स्वतःसिद्ध आहे व परिपूर्ण आहे; त्याला दुसऱ्या कोठूनहि पूर्णता प्राप्त होण्याची नसते.",
+      "en": "God's Name is self-established and complete in itself; it has no completeness to receive from anywhere else.",
+      "highlight": 0
+    },
+    {
+      "n": 3,
+      "mr": "सद्गुरूकडून घेतलेलें नाम व आपण स्वतःचे पसंतीनें घेतलेलें नाम ह्यांत फरक होऊं शकत नाहीं; कारण तसा फरक जर करूं लागलों तर एकाच सद्गुरूकडून घेतलेल्या नामांतहि फरक करावा लागेल.",
+      "en": "There can be no difference between the Name received from a Sadguru and the Name one takes up by one's own choice; for if we began making such distinctions, we should have to distinguish even between Names received from one and the same Sadguru.",
+      "highlight": 0
+    },
+    {
+      "n": 4,
+      "mr": "तसेंच सद्गुरु तरुण असतांना त्यानें दिलेलें नाम व म्हातारपणीं, किंवा देह सोडल्यानंतरहि दिलेलें नाम यांतहि फरक असूं शकत नाहीं.",
+      "en": "In the same way there can be no difference between the Name a Sadguru gave in his youth and the Name given in old age — or even after he has left the body.",
+      "highlight": 0
+    },
+    {
+      "n": 5,
+      "mr": "तरीसुद्धां सद्गुरूकडून घेतलेल्या नामाचें वैशिष्ट्य असें कीं, तो त्या नामाचे पाठीशीं संतरूपानें असतो, व आपल्याकडून नामस्मरण होण्याचे बाबतींत त्याची आपणांस फार मदत होते; व त्याचमुळें, आपल्या हातून होणारें नामस्मरण त्याचे सत्तेनें होत आहे ही जाणीव राहून, “मी नामस्मरण करतों” अशा तऱ्हेचा अहंकार होण्याला वाव राहात नाहीं.",
+      "en": "Even so, the particular virtue of the Name received from a Sadguru is this: he stands behind that Name in the form of a saint, and he helps us greatly in the matter of the remembrance actually happening through us; and because of that, the awareness remains that it is happening by his power, so there is no room for the pride of thinking “I am doing the remembrance.”",
+      "highlight": 0
+    },
+    {
+      "n": 6,
+      "mr": "म्हणूनच सद्गुरूकडून नाम घेणें जरूर आहे.",
+      "en": "That is precisely why it is necessary to receive the Name from a Sadguru.",
+      "highlight": 0
+    },
+    {
+      "n": 7,
+      "mr": "सद्गुरुभेट होईपर्यंत मात्र आपण नामस्मरण करीत राहणें जरूर आहे; कारण तेंच नामस्मरण सद्गुरूची भेट करवून देईल.",
+      "en": "Until that meeting with the Sadguru comes, however, we must go on remembering the Name; for it is that very remembrance which will bring the meeting about.",
+      "highlight": 0
+    },
+    {
+      "n": 8,
+      "mr": "आधीं संतांची भेट होणें कठीण; व समजा भेट झाली, तरी त्यांच्यावर विश्वास बसणें त्याहून कठीण असतें.",
+      "en": "Meeting a saint is hard to begin with; and supposing the meeting does happen, coming to trust him is harder still.",
+      "highlight": 0
+    },
+    {
+      "n": 9,
+      "mr": "म्हणून नामाचें साधन चालू ठेवाचें.",
+      "en": "So keep the practice of the Name going.",
+      "highlight": 0
+    },
+    {
+      "n": 10,
+      "mr": "ज्याप्रमाणें खडीसाखर ठेवली म्हणजे मुंगळ्यांना आमंत्रण देण्याची जरूरी नसते, ते आपोआप तिचा शोध काढीत येतात, कारण ती त्यांना फार आवडते; त्याप्रमाणें तुम्ही खडीसाखर बना, म्हणजे संत तुमच्याकडे धांवतच येतील.",
+      "en": "Just as, when rock sugar is set out, there is no need to invite the ants — they come searching it out of their own accord, because they love it so much — in the same way, become rock sugar, and saints will come running to you.",
+      "highlight": 0
+    },
+    {
+      "n": 11,
+      "mr": "‘खडीसाखर बना’ म्हणजे संतांना आवडेल असें वर्तन करा.",
+      "en": "‘Become rock sugar’ means: behave in a way that saints will love.",
+      "highlight": 0
+    },
+    {
+      "n": 12,
+      "mr": "संतांना काय आवडतें ?",
+      "en": "And what is it that saints love?",
+      "highlight": 0
+    },
+    {
+      "n": 13,
+      "mr": "भगवंताचें अनुसंधान व अखंड नामस्मरण याशिवाय त्यांना कोणतीहि गोष्ट प्रिय नाहीं.",
+      "en": "Nothing whatever is dear to them except unbroken attention to God and ceaseless remembrance of the Name.",
+      "highlight": 0
+    },
+    {
+      "n": 14,
+      "mr": "म्हणून आपल्या हृदयामध्यें अखंड नामाची ज्योत तेवत ठेवा, सद्गुरु तुमचा शोध घेत येतील व तुमच्यावर कृपेचा वर्षाव करतील.",
+      "en": "So keep the flame of the unbroken Name burning in your heart; the Sadguru will come seeking you, and will pour his grace upon you.",
+      "highlight": 0
+    }
+  ],
+  "footnote": {
+    "marker": "२",
+    "mr": "कोणतेंच कर्म यथासांग घडत नसतें; तरीपण मनुष्यानें संस्कार-कर्म शास्त्रप्रमाणें करून जेथें कमी पडेल तेथें भगवंताचें स्मरण करावें. भगवंताची श्रद्धा वाढावी हाच संस्कारांचा मूळ हेतु आहे.",
+    "en": "No rite is ever performed perfectly; even so, one should carry out the prescribed observances according to the śāstra and, wherever they fall short, make up the lack by remembrance of God. That faith in God should grow is the root purpose of the observances."
+  },
+  "commentary": [],
+  "commentary_status": {
+    "state": "none",
+    "author": null,
+    "reviewed_by_marathi_editor": false,
+    "reviewed_by_publisher": false
+  }
+}

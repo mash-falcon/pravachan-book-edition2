@@ -137,6 +137,8 @@ body[data-tr="on"] .foot .fen{display:block}
 .notes.flow{position:static}
 .notes.flow .note{position:static;margin-bottom:1rem;border-left:1px solid var(--rule)}
 body[data-comm="off"] .voice,body[data-comm="off"] .notes{display:none}
+/* a day with no commentary shows no commentary apparatus at all */
+body[data-comm="none"] .voice,body[data-comm="none"] .notes{display:none}
 
 .marginfoot{margin-top:1.8rem}
 .prov{border-left:2px solid var(--gold);padding:.05rem 0 .05rem .7rem;margin-bottom:1.3rem}
@@ -303,28 +305,19 @@ body[data-marks="off"] .prov{opacity:.25}
       <b>श्री ब्रह्मचैतन्य गोंदवलेकर महाराज</b> — Brahmachaitanya of Gondavale, a saint of
       Maharashtra whose teaching centres on <b>नामस्मरण</b>, the constant remembrance of the
       Name of Rama. The book is arranged as one discourse for each day of the year;
-      this is the entry for १ जानेवारी.</p>
+      this is the entry for <b id="ctxDay"></b>.</p>
     </div>
     <div>
       <h4>This page</h4>
-      <p>Title: <b>परमात्मस्वरूपच असणारें नाम</b>. Twenty-three sentences of continuous prose
-      and one footnote. Set here from a scanned copy of a printed Marathi edition, in its
-      <b>original orthography</b> — नांव, कांहीं, नाहीं — which is retained deliberately
-      rather than modernised.</p>
+      <p id="ctxPage"></p>
     </div>
     <div>
       <h4>The underlines</h4>
-      <p>Eleven passages are marked. The marks were made <b>by hand, by a previous reader
-      of this copy</b>, and are reproduced as an inherited layer. They are not the author's
-      emphasis, and no editorial claim is made for them. The scan they come from can be
-      opened with <b>Facsimile</b>.</p>
+      <p id="ctxMarks"></p>
     </div>
     <div>
       <h4>This edition</h4>
-      <p>A prototype. The English translation and the margin commentary were drafted for
-      this edition and have <b>not been reviewed</b>. Publisher, edition, and date of the
-      printed source, and the rights position for reproducing it, remain
-      <b>to be confirmed</b>.</p>
+      <p id="ctxEdition"></p>
     </div>
   </div>
 </section>
@@ -527,7 +520,43 @@ document.getElementById('bJap').onclick=()=>{
 };
 
 /* ---------- controls ---------- */
-function refresh(){renderBody();renderNotes();requestAnimationFrame(()=>{place();checkFit()})}
+function refresh(){renderBody();renderNotes();describePage();
+  requestAnimationFrame(()=>{place();checkFit()})}
+
+/* The page must describe itself from its own data. This band used to be written by
+   hand for 1 January, which meant every other day inherited its facts. */
+function describePage(){
+  const n=DATA.sentences.length, m=DATA.marks||{}, c=(DATA.points||[]).length;
+  const num=x=>['no','one','two','three','four','five','six','seven','eight','nine','ten',
+    'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen',
+    'nineteen','twenty'][x] ?? String(x);
+  const el=id=>document.getElementById(id);
+  el('ctxDay').textContent = DATA.date.label_mr;
+  el('ctxPage').innerHTML =
+    `Title: <b>${DATA.title_mr}</b>. ${num(n).replace(/^./,ch=>ch.toUpperCase())} `
+    + `sentence${n===1?'':'s'} of continuous prose${DATA.has_footnote?' and one footnote':''}. `
+    + `Set from a scanned copy of a printed Marathi edition, in its <b>original orthography</b> `
+    + `— नांव, कांहीं, नाहीं — retained deliberately rather than modernised.`;
+  const count=m.count_passages ?? 0;
+  el('ctxMarks').innerHTML = count
+    ? `${num(count).replace(/^./,ch=>ch.toUpperCase())} passage${count===1?'':'s'} `
+      + `${count===1?'is':'are'} marked. The marks were made <b>by hand, by a previous reader `
+      + `of this copy</b>, and are reproduced as an inherited layer. They are not the author's `
+      + `emphasis, and no editorial claim is made for them.`
+      + (m.confirmed_by_human===false
+         ? ` <b>Not yet confirmed against the scan.</b>` : ``)
+    : `<b>No underlines have been recorded for this page yet.</b> `
+      + `${m.note ? m.note + ' ' : ''}`
+      + `Zero here means <b>unknown</b>, not none.`;
+  el('ctxEdition').innerHTML =
+    `A prototype. The English translation${c?' and the margin commentary were':' was'} drafted `
+    + `for this edition and ${c?'have':'has'} <b>not been reviewed</b>. `
+    + (c ? `` : `There is no commentary for this page. `)
+    + `Publisher, edition, and date of the printed source, and the rights position for `
+    + `reproducing it, remain <b>to be confirmed</b>.`;
+  document.body.dataset.comm = c ? document.body.dataset.comm : 'off';
+  document.getElementById('bNotes').hidden = !c;
+}
 document.getElementById('lang').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   document.body.dataset.lang=b.dataset.lang;
