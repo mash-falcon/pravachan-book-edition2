@@ -28,6 +28,13 @@ PAGES = ROOT / "source" / "pages"
 DEFAULT_URL = os.environ.get("PRAVACHAN_BASE_URL", "http://localhost:11434/v1")
 DEFAULT_MODEL = os.environ.get("PRAVACHAN_MODEL", "qwen2.5vl:7b")
 API_KEY = os.environ.get("PRAVACHAN_API_KEY", "local")
+ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+
+
+def provider_for(base_url: str) -> str:
+    """Anthropic and OpenAI-compatible servers want different request shapes.
+    Pick from the URL rather than making every caller pass a flag."""
+    return "anthropic" if "anthropic.com" in base_url else "openai"
 
 
 def find_image(day_id: str) -> pathlib.Path:
@@ -38,8 +45,46 @@ def find_image(day_id: str) -> pathlib.Path:
     raise SystemExit(f"no scan found at source/pages/{day_id}.[jpg|png]")
 
 
+def _post(url: str, body: dict, headers: dict) -> dict:
+    req = urllib.request.Request(url, data=json.dumps(body).encode(), headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=1800) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        raise SystemExit(f"HTTP {e.code} from {url}\n"
+                         + e.read().decode(errors="replace")[:600])
+    except urllib.error.URLError as e:
+        raise SystemExit(f"cannot reach {url}: {e.reason}\n"
+                         f"Check PRAVACHAN_BASE_URL. Try: python3 conversion/probe.py --list")
+
+
+def _call_anthropic(base_url, model, prompt, image, max_tokens) -> str:
+    """Anthropic Messages API. Raw HTTP so this stays dependency-free."""
+    if not ANTHROPIC_KEY:
+        raise SystemExit("ANTHROPIC_API_KEY is not set")
+    content = [{"type": "text", "text": prompt}]
+    if image is not None:
+        mime = "image/png" if image.suffix.lower() == ".png" else "image/jpeg"
+        content.append({"type": "image", "source": {
+            "type": "base64", "media_type": mime,
+            "data": base64.b64encode(image.read_bytes()).decode()}})
+    payload = _post(base_url.rstrip("/") + "/messages",
+                    {"model": model, "max_tokens": max_tokens,
+                     "messages": [{"role": "user", "content": content}]},
+                    {"content-type": "application/json",
+                     "x-api-key": ANTHROPIC_KEY,
+                     "anthropic-version": "2023-06-01"})
+    if payload.get("stop_reason") == "max_tokens":
+        print("    WARNING: response hit the token limit and was cut off.", file=sys.stderr)
+    # every text block, not just the first — a response can lead with another type
+    return "".join(b.get("text", "") for b in payload.get("content", [])
+                   if b.get("type") == "text")
+
+
 def call(base_url: str, model: str, prompt: str, image: pathlib.Path | None,
          temperature: float, max_tokens: int = 8192) -> str:
+    if provider_for(base_url) == "anthropic":
+        return _call_anthropic(base_url, model, prompt, image, max_tokens)
     content = [{"type": "text", "text": prompt}]
     if image is not None:
         mime = "image/png" if image.suffix.lower() == ".png" else "image/jpeg"

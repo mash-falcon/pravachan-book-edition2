@@ -30,6 +30,28 @@ python3 conversion/pipeline.py --image X.jpg --id 01-02 --from merge     # no mo
 python3 conversion/pipeline.py --image X.jpg --id 01-02 --force          # redo everything
 ```
 
+### Which endpoint
+
+`--base-url` decides the API shape. Anything containing `anthropic.com` speaks the
+Messages API and reads `ANTHROPIC_API_KEY`; everything else speaks OpenAI-compatible
+`/v1/chat/completions` and reads `PRAVACHAN_API_KEY`. No SDK either way.
+
+```bash
+--base-url https://api.anthropic.com/v1      --model claude-sonnet-5
+--base-url https://inference-api.nvidia.com/v1 --model nvidia/baidu/paddleocr-vl
+--base-url http://localhost:11434/v1         --model qwen2.5vl:7b
+```
+
+The run prints which provider it picked, so a misconfigured URL shows up on line one
+rather than as a confusing HTTP error.
+
+### It is a repository tool
+
+`pipeline.py` needs `conversion/assist.py` beside it, and `templates/` and
+`tools/build.py` above it to render. **Run it from inside a clone**, not from a copy
+dropped in another directory — it says so if you try. For a single self-contained
+call, `conversion/probe_anthropic.py` is the file to copy around.
+
 Two safety defaults worth knowing:
 
 - The merged day is **not** copied into `content/days/` unless you pass `--promote`.

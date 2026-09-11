@@ -25,11 +25,31 @@ stage, or --from/--only to control which run.
 
 Models: --model is the vision model (transcribe, marks), --text-model the one used
 for translation and summary. Both default to the PRAVACHAN_* environment.
+
+Endpoint: --base-url decides which API shape is used. Anything containing
+anthropic.com speaks the Messages API and reads ANTHROPIC_API_KEY; everything else
+speaks OpenAI-compatible /v1/chat/completions and reads PRAVACHAN_API_KEY.
+
+    --base-url https://api.anthropic.com/v1 --model claude-sonnet-5
+    --base-url https://inference-api.nvidia.com/v1 --model nvidia/baidu/paddleocr-vl
+    --base-url http://localhost:11434/v1 --model qwen2.5vl:7b
 """
 import argparse, json, os, pathlib, shutil, subprocess, sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from assist import call, as_json, DEFAULT_URL, DEFAULT_MODEL   # same HTTP path, one place
+try:
+    from assist import call, as_json, DEFAULT_URL, DEFAULT_MODEL  # same HTTP path, one place
+except ModuleNotFoundError:
+    sys.exit(
+        "pipeline.py is a repository tool, not a standalone script.\n"
+        "It needs conversion/assist.py beside it, and templates/ and tools/build.py\n"
+        "above it to render anything.\n\n"
+        "Run it from inside a clone:\n"
+        "    git clone https://github.com/mash-falcon/pravachan-book-edition2.git\n"
+        "    cd pravachan-book-edition2\n"
+        "    python3 conversion/pipeline.py --image ~/Downloads/Edn2_Jan02.JPG --id 01-02 \\\n"
+        "        --out-full renders/jan02.html\n\n"
+        "For a single self-contained call, use conversion/probe_anthropic.py instead.")
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PROMPTS = ROOT / "conversion" / "prompts"
@@ -232,7 +252,9 @@ def main() -> None:
         start = STAGES.index(a.start) if a.start else 0
         todo = STAGES[start:]
 
-    print(f"\n{a.id}   {image.name}   {a.model}\n")
+    from assist import provider_for
+    print(f"\n{a.id}   {image.name}")
+    print(f"{provider_for(a.base_url)} · {a.base_url} · {a.model}\n")
     for stage in todo:
         name = ARTIFACT[stage]
         existing = art(work, name) if name else None
