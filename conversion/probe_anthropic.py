@@ -32,12 +32,21 @@ except ImportError:
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent
 
-# The forms this edition prints, and what a model "corrects" them to.
-ORTHOGRAPHY = [
-    ("नांव", "नाव"), ("कांहीं", "काही"), ("नाहीं", "नाही"), ("केलीं", "केली"),
-    ("हें", "हे"), ("तें", "ते"), ("असें", "असे"), ("घ्यावें", "घ्यावे"),
-    ("जसें", "जसे"), ("शेवटीं", "शेवटी"), ("मुळांत", "मुळात"),
+# Book form -> modern form.
+# STRONG pairs: the modern spelling has no other reading, so seeing it is real
+# evidence the model normalised the text.
+STRONG = [
+    ("नांव", "नाव"), ("कांहीं", "काही"), ("नाहीं", "नाही"),
+    ("शेवटीं", "शेवटी"), ("मुळांत", "मुळात"), ("पाहिजें", "पाहिजे"),
 ]
+# AMBIGUOUS pairs: the "modern" form is also an ordinary Marathi word, so a count
+# here proves nothing. ते is "they", हे is "these", केली is the feminine past —
+# all legitimate. Reported for information, never counted toward the verdict.
+AMBIGUOUS = [
+    ("तें", "ते"), ("हें", "हे"), ("असें", "असे"),
+    ("केलीं", "केली"), ("घ्यावें", "घ्यावे"), ("जसें", "जसे"),
+]
+ORTHOGRAPHY = STRONG + AMBIGUOUS
 
 FALLBACK_PROMPT = """You are transcribing one page of a printed Marathi devotional book.
 
@@ -46,10 +55,14 @@ preserve it letter for letter. Do not "correct" नांव to नाव, क�
 नाहीं to नाही, तें to ते, or हें to हे. If a spelling looks wrong to you, it is
 probably correct for this edition. Do not normalise anusvara or vowel length.
 
-Split into sentences, numbered from 1. Mark illegible words as [?].
+Split the BODY into sentences, numbered from 1. Mark illegible words as [?].
+
+The page title and the date are NOT sentences. Put them in their own fields and do
+not repeat them in the sentence list. The footnote is not a sentence either.
 
 Return ONLY valid JSON:
-{"title_mr": "...", "sentences": [{"n": 1, "mr": "..."}], "footnote": {"mr": "..."}}
+{"title_mr": "...", "date_label_mr": "e.g. २ जानेवारी",
+ "sentences": [{"n": 1, "mr": "..."}], "footnote": {"marker": "२", "mr": "..."}}
 """
 
 MEDIA = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
@@ -57,27 +70,47 @@ MEDIA = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
 
 
 def orthography_report(text: str) -> None:
-    """Whole-word counting. Substrings get this wrong: ते is inside होते and
-    तेव्हां, हे is inside आहे — naive matching flags a faithful page as modernised."""
+    """Whole-word counting, and only STRONG pairs decide the verdict.
+
+    Substring matching gets this wrong (ते sits inside होते), and so does treating
+    every pair as diagnostic: ते is also the plural pronoun "they", so one of them
+    on a page is ordinary Marathi, not evidence of anything."""
     counts = collections.Counter(re.findall(r"[ऀ-ॿ]+", text))
-    rows = [(old, counts[old], new, counts[new]) for old, new in ORTHOGRAPHY
-            if counts[old] or counts[new]]
+
+    def rows(pairs):
+        return [(o, counts[o], n, counts[n]) for o, n in pairs if counts[o] or counts[n]]
+
+    strong, ambig = rows(STRONG), rows(AMBIGUOUS)
     print("\nORTHOGRAPHY")
-    if not rows:
+    if not strong and not ambig:
         print("  none of the tracked forms appear — too little Devanagari to judge")
         return
-    kept = sum(r[1] for r in rows)
-    lost = sum(r[3] for r in rows)
-    print(f"  {'book form':<12}{'kept':>6}   {'modern form':<12}{'used':>6}")
-    for old, a, new, b in rows:
-        print(f"  {old:<12}{a:>6}   {new:<12}{b:>6}{'  <-- modernised' if b else ''}")
-    print(f"\n  kept {kept} book form(s), used {lost} modern form(s)")
+
+    def show(title, rs):
+        if not rs:
+            return
+        print(f"  {title}")
+        print(f"    {'book form':<12}{'kept':>6}   {'modern form':<12}{'used':>6}")
+        for o, a, n, b in rs:
+            print(f"    {o:<12}{a:>6}   {n:<12}{b:>6}{'   <-- modernised' if b else ''}")
+
+    show("diagnostic", strong)
+    show("ambiguous (the modern form is also a normal word — not counted)", ambig)
+
+    kept = sum(r[1] for r in strong)
+    lost = sum(r[3] for r in strong)
+    amb_modern = sum(r[3] for r in ambig)
+    print(f"\n  diagnostic: kept {kept} book form(s), used {lost} modern form(s)")
     if lost:
         print("  VERDICT: this model rewrites the orthography. Usable only if every")
         print("           sentence is corrected by hand — most of the work it was to save.")
+    elif kept:
+        print("  VERDICT: orthography preserved on the forms that can prove it.")
+        if amb_modern:
+            print(f"           ({amb_modern} ambiguous form(s) present; check a few by eye,")
+            print("            but ते/हे/केली are ordinary words and usually mean nothing.)")
     else:
-        print("  VERDICT: orthography preserved in this sample.")
-
+        print("  VERDICT: no diagnostic form appeared — this page cannot judge the model.")
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,

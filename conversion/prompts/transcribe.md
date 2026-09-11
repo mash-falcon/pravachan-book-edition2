@@ -12,8 +12,11 @@ RULES — these override anything else:
    If a spelling looks wrong to you, it is probably correct for this edition.
    Reproduce it. Do not normalise anusvara, visarga, or vowel length.
 
-2. Split the text into sentences. A sentence ends at a full stop (.) — Devanagari
+2. Split the BODY into sentences. A sentence ends at a full stop (.) — Devanagari
    danda (।) if present. Number them from 1.
+
+   The title and the date are NOT sentences. They have their own fields below.
+   Do not repeat them in the sentence list, and do not make the date sentence 1.
 
 3. Record the paragraph breaks as they appear on the page.
 

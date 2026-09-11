@@ -76,14 +76,19 @@ python3 conversion/probe.py --model X --image any.png --prompt "Extract the text
 `probe.py` prints the raw response, latency, token counts and `finish_reason`, saves
 the full text to `content/drafts/probes/`, and then runs an **orthography check that
 needs no verified day file**: it counts whole Devanagari words and reports how often
-the model used the book's form (नांव, कांहीं, नाहीं, तें, हें) versus the modern one.
+the model used the book's form versus the modern one.
 
-That check is the fastest useful signal you can get from one call. On the 1 January
-text it reports 28 book forms and 0 modern forms for a faithful transcription, and
-the exact inverse for a modernised one.
+Two things that check gets right, both learned the hard way:
 
-Note it counts **whole words**, not substrings — ते is inside होते and तेव्हां, हे is
-inside आहे, so substring counting flags a perfectly faithful page as modernised.
+**It counts whole words, not substrings.** ते sits inside होते and तेव्हां, हे inside
+आहे. Substring counting reported a perfectly faithful page as modernised.
+
+**Only unambiguous pairs decide the verdict.** नाहीं→नाही and कांहीं→काही are real
+evidence: the modern spelling has no other reading. But तें→ते proves nothing, because
+**ते is also the ordinary word for "they"** — a page about ants finding sugar will
+contain ते legitimately. Six of the eleven pairs are like this. They are printed under
+"ambiguous" and excluded from the verdict, so a clean transcription is not condemned
+by a pronoun.
 
 ### Against the Anthropic API directly
 
