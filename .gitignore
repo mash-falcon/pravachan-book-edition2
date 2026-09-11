@@ -16,3 +16,7 @@ __pycache__/
 
 # local credentials
 .env
+
+# model artifacts and rendered output are regenerable
+work/
+renders/

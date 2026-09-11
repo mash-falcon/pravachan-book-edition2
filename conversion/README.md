@@ -1,5 +1,48 @@
 # Conversion — a page image becomes a day file
 
+## The whole thing in one command
+
+```bash
+python3 conversion/pipeline.py \
+    --image ~/Downloads/Edn2_Jan02.JPG --id 01-02 \
+    --out-full renders/jan02.html --out-summary renders/jan02-summary.html
+```
+
+Every stage writes a named artifact you can read and edit, because the model's
+output needs correcting and the corrections must survive:
+
+| artifact | what it is |
+|---|---|
+| `work/<id>/1-transcript.mr.txt` | raw Marathi, plain text, one sentence per line |
+| `work/<id>/1-transcript.json` | the same, structured |
+| `work/<id>/2-english.txt` | the translation, aligned by sentence number |
+| `work/<id>/2-english.json` | the same, structured |
+| `work/<id>/3-marks.json` | which sentences the previous reader underlined |
+| `work/<id>/4-day.json` | everything merged — the file the readers read |
+| `work/<id>/5-summary.json` | the summary essay and the day's practice |
+
+Re-running skips any stage whose artifact already exists, so fixing
+`1-transcript.mr.txt` by hand and re-running costs nothing:
+
+```bash
+python3 conversion/pipeline.py --image X.jpg --id 01-02 --only marks     # redo one stage
+python3 conversion/pipeline.py --image X.jpg --id 01-02 --from merge     # no model calls
+python3 conversion/pipeline.py --image X.jpg --id 01-02 --force          # redo everything
+```
+
+Two safety defaults worth knowing:
+
+- The merged day is **not** copied into `content/days/` unless you pass `--promote`.
+- `render` never overwrites an existing `content/days/<id>.json`. If you have already
+  corrected a day by hand, re-running the pipeline will not silently undo it.
+
+The summary stage writes a **stub**, on purpose. The summary is editorial writing
+built from the underlined passages — extraction cannot produce it, and a model
+inventing it is exactly the authority problem this edition is built to avoid.
+Fill it in by hand, then `--only render`.
+
+## Doing it stage by stage
+
 ```
 source/pages/01-01.jpg          the scan
         │
@@ -14,7 +57,7 @@ apps/full-page/01-01.html       the reader
 apps/short-page/01-01.html
 ```
 
-## Doing one day
+### Or by hand, without any model
 
 1. `python3 conversion/new_day.py 01-02`
 2. Transcribe the Marathi **sentence by sentence**, in the book's **original
