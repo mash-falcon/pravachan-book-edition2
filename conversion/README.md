@@ -1,5 +1,8 @@
 # Conversion — a page image becomes a day file
 
+> Sending a page to a reviewer? `python3 tools/package.py --id 01-01 --out jan01.html`
+> makes one self-contained file. See the note at the end of this README.
+
 ## The whole thing in one command
 
 ```bash
@@ -424,3 +427,28 @@ Errors block a build; warnings do not.
   underlined** — this is what keeps the short page honest about being built from
   the inherited marks
 - warns when a translation, page image, named author, or Marathi review is missing
+
+
+## Sending a page out for review
+
+A page built into `apps/` is not portable — the facsimile is a relative path that
+will not exist on anyone else's disk, and the fonts come from a CDN, so the
+Devanagari degrades to a system serif for a reader who is offline or behind a
+firewall that blocks Google.
+
+```bash
+python3 tools/build.py 01-01
+python3 tools/package.py --id 01-01 --out jan01-review.html
+```
+
+That inlines the webfonts and the page scan as data URIs and prepends a banner
+stating what the reader is looking at: that the older spellings are deliberate, that
+the underlines are one previous reader's hand marks rather than the author's
+emphasis, and that **the translation, commentary and summary have had no review**.
+Without that, a reviewer reasonably assumes someone has already approved them.
+
+Roughly 3.3 MB with the scan, 2.3 MB without (`--no-scan`). For a reviewer who would
+rather have a PDF, open it and Print → Save as PDF; the print stylesheet drops the
+toolbar and forces the light palette.
+
+`--page short` packages the summary instead, `--page passages` the marked passages.
