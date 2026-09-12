@@ -69,10 +69,23 @@ Two safety defaults worth knowing:
 - `render` never overwrites an existing `content/days/<id>.json`. If you have already
   corrected a day by hand, re-running the pipeline will not silently undo it.
 
-The summary stage writes a **stub**, on purpose. The summary is editorial writing
-built from the underlined passages — extraction cannot produce it, and a model
-inventing it is exactly the authority problem this edition is built to avoid.
-Fill it in by hand, then `--only render`.
+### The summary, and what fences it in
+
+The summary stage drafts the short edition from the underlined passages. A model is
+allowed to write it, but inside a hard boundary:
+
+- `prompts/summary.md` says the underlined passages carry the argument and the
+  model's own sentences only connect them, and that **every claim must be cited**
+  as `{{n}}` pointing at an underlined sentence.
+- `validate.py` **refuses the file** if any citation points at a sentence that is not
+  underlined. Not a warning — a build-blocking error.
+
+That check is what keeps the short page an abridgement of the previous reader's
+marks rather than an essay the model felt like writing. Verified: adding a citation
+to an unmarked sentence fails validation with exit code 1.
+
+It still needs reading. The guard proves *where* a claim came from, not that the
+Marathi is idiomatic or the argument fair.
 
 ## Doing it stage by stage
 

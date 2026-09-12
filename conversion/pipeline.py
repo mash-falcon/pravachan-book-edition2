@@ -34,7 +34,7 @@ speaks OpenAI-compatible /v1/chat/completions and reads PRAVACHAN_API_KEY.
     --base-url https://inference-api.nvidia.com/v1 --model nvidia/baidu/paddleocr-vl
     --base-url http://localhost:11434/v1 --model qwen2.5vl:7b
 """
-import argparse, datetime, json, os, pathlib, shutil, subprocess, sys
+import argparse, datetime, json, os, pathlib, re, shutil, subprocess, sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 try:
@@ -191,27 +191,41 @@ def stage_merge(cfg, work):
 
 
 def stage_summary(cfg, work):
+    """Drafts the short edition from the underlined passages.
+
+    A model may draft this, but it is fenced in: the prompt allows citations only to
+    underlined sentences, and conversion/validate.py rejects the file if any {{n}}
+    points at an unmarked one. That is what keeps the short page an abridgement of
+    the reader's marks rather than an essay the model felt like writing."""
     day = load(art(work, "4-day.json"))
     marked = [s for s in day["sentences"] if s["highlight"]]
     if not marked:
-        print("    no underlined passages — skipping the summary")
+        print("    no underlined passages — nothing to summarise, skipping")
         return
-    save(art(work, "5-summary.json"), cfg=cfg, how="stub — to be written by hand", obj={
-        "id": cfg["id"],
-        "status": {"state": "draft", "author": None,
-                   "reviewed_by_marathi_editor": False, "reviewed_by_publisher": False,
-                   "note": "Written by hand, not generated. The essay below is a stub."},
-        "essay": [{"lead": True,
-                   "mr": "…",
-                   "en": "…"}],
-        "begin_today": {"heading_mr": "आजची सुरुवात", "heading_en": "begin today",
-                        "steps": [], "close_mr": "", "close_en": ""},
-        "practice_actions": [],
-        "_marked_sentences": [s["n"] for s in marked],
-    })
-    print("    summary is a STUB. The essay is editorial writing, not extraction —")
-    print("    fill 5-summary.json by hand, then re-run --only render.")
+    full = "\n".join(f'{s["n"]}. {s["mr"]}' for s in day["sentences"])
+    nums = ", ".join(str(s["n"]) for s in marked)
+    prompt = ((PROMPTS / "summary.md").read_text(encoding="utf-8")
+              + f"\n\nTITLE: {day['title_mr']}\n\nDISCOURSE:\n{full}"
+              + f"\n\nUNDERLINED SENTENCES: {nums}\n")
+    r = as_json(call(cfg["base_url"], cfg["text_model"], prompt, None, 0.0,
+                     cfg["max_tokens"]), "summary")
 
+    allowed = {s["n"] for s in marked}
+    bad = set()
+    for blk in r.get("essay", []):
+        for lang in ("mr", "en"):
+            bad |= {int(n) for n in re.findall(r"\{\{(\d+)\}\}", blk.get(lang, ""))} - allowed
+    r.update(id=cfg["id"], status={
+        "state": "draft", "author": None,
+        "reviewed_by_marathi_editor": False, "reviewed_by_publisher": False,
+        "note": f"Drafted by {cfg['text_model']} from the underlined passages. "
+                "Marathi connective prose needs a native editor."})
+    save(art(work, "5-summary.json"), r, cfg)
+    print(f"    {len(r.get('essay', []))} blocks, "
+          f"{len(r.get('practice_actions', []))} practice action(s)")
+    if bad:
+        print(f"    REJECTED CITATIONS {sorted(bad)} — these sentences are not underlined.")
+        print("    Fix them by hand; validate.py will refuse the file until you do.")
 
 def stage_render(cfg, work):
     src = art(work, "4-day.json")
@@ -222,8 +236,14 @@ def stage_render(cfg, work):
         shutil.copyfile(src, dest)
         print(f"    staged {rel(dest)} for rendering")
     s = art(work, "5-summary.json")
-    if s.exists() and "…" not in s.read_text(encoding="utf-8"):
-        shutil.copyfile(s, ROOT / "summary" / "days" / f"{cfg['id']}.json")
+    if s.exists():
+        blocks = load(s).get("essay", [])
+        if any(b.get("mr", "").strip() not in ("", "…") for b in blocks):
+            (ROOT / "summary" / "days").mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(s, ROOT / "summary" / "days" / f"{cfg['id']}.json")
+            print(f"    staged summary for {cfg['id']}")
+        else:
+            print("    summary has no written blocks — short page will be skipped")
     subprocess.run([sys.executable, str(ROOT / "tools" / "build.py"), cfg["id"]], check=True)
     for built, out in ((ROOT / "apps" / "full-page" / f"{cfg['id']}.html", cfg["out_full"]),
                        (ROOT / "apps" / "short-page" / f"{cfg['id']}.html", cfg["out_summary"])):

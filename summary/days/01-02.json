@@ -1,0 +1,73 @@
+{
+  "id": "01-02",
+  "status": {
+    "state": "draft",
+    "author": null,
+    "reviewed_by_marathi_editor": false,
+    "reviewed_by_publisher": false,
+    "note": "Written in-session from the underlined passages. Marathi connective prose needs a native editor."
+  },
+  "essay": [
+    {
+      "lead": true,
+      "mr": "प्रश्न साधा आहे — नाम सद्गुरूकडूनच घ्यावें लागतें कां? उत्तरहि साधें आहे: <strong>भगवंताचें नांव स्वतःसिद्ध आहे व परिपूर्ण आहे; त्याला दुसऱ्या कोठूनहि पूर्णता प्राप्त होण्याची नसते</strong>{{2}}.",
+      "en": "The question is a plain one — must the Name be received from a Sadguru? The answer is plain too: <strong>God's Name is self-established and complete in itself; it has no completeness to receive from anywhere else</strong>{{2}}."
+    },
+    {
+      "mr": "म्हणजे सद्गुरु नामांत कांहीं भर घालत नाहीं. मग तो देतो काय?",
+      "en": "So the Sadguru adds nothing to the Name. Then what is it that he gives?"
+    },
+    {
+      "pull": 5
+    },
+    {
+      "mr": "<strong>तो त्या नामाचे पाठीशीं संतरूपानें असतो</strong>, आणि त्यामुळें “मी नामस्मरण करतों” अशा तऱ्हेचा अहंकार होण्याला वाव राहात नाहीं{{5}}. नाम तेंच राहतें; बदलतो तो घेणारा.",
+      "en": "<strong>He stands behind that Name in the form of a saint</strong>, and because of that there is no room left for the pride of thinking “I am doing the remembrance”{{5}}. The Name stays the same; what changes is the one taking it."
+    },
+    {
+      "mr": "पण सद्गुरु अजून भेटला नसेल तर? <strong>सद्गुरुभेट होईपर्यंत आपण नामस्मरण करीत राहणें जरूर आहे; कारण तेंच नामस्मरण सद्गुरूची भेट करवून देईल</strong>{{7}}. वाट पाहणें ही अट नाहीं — नामच तो मार्ग आहे.",
+      "en": "But what if the Sadguru has not yet been met? <strong>Until that meeting comes, we must go on remembering the Name; for it is that very remembrance which will bring the meeting about</strong>{{7}}. Waiting is not a precondition — the Name is itself the road."
+    },
+    {
+      "mr": "म्हणून शोधायला निघण्याची गरज नाहीं. <strong>आपल्या हृदयामध्यें अखंड नामाची ज्योत तेवत ठेवा, सद्गुरु तुमचा शोध घेत येतील</strong>{{14}}.",
+      "en": "So there is no need to set out searching. <strong>Keep the flame of the unbroken Name burning in your heart; the Sadguru will come seeking you</strong>{{14}}."
+    }
+  ],
+  "begin_today": {
+    "heading_mr": "आजची सुरुवात",
+    "heading_en": "begin today",
+    "steps": [
+      {
+        "word": "चालू ठेवा",
+        "mr": "भेटीची वाट न पाहतां नामस्मरण चालू ठेवावें.",
+        "en": "Go on with the Name without waiting for the meeting."
+      },
+      {
+        "word": "ज्योत जपा",
+        "mr": "हृदयांत अखंड नामाची ज्योत तेवत ठेवावी.",
+        "en": "Tend the flame — keep it unbroken in the heart."
+      },
+      {
+        "word": "“मी” सोडा",
+        "mr": "नामस्मरण त्याच्या सत्तेनें होतें; कर्तेपण आपलें नाहीं.",
+        "en": "The remembrance happens by his power; the doing is not yours."
+      }
+    ],
+    "close_mr": "सद्गुरूचा शोध घ्यायला निघावें लागत नाहीं; ज्योत तेवती ठेवली कीं तेच येतात.",
+    "close_en": "You do not have to go looking for the Sadguru. Keep the flame lit, and he comes."
+  },
+  "practice_actions": [
+    {
+      "sentence": 7,
+      "today": "Do not postpone the Name until you have a teacher. Today's remembrance is what brings the teacher."
+    },
+    {
+      "sentence": 14,
+      "today": "Return to it often enough that it never quite goes out — a flame, not an appointment."
+    },
+    {
+      "sentence": 5,
+      "today": "When you notice the thought \\u201cI am doing this\\u201d, let it go and carry on."
+    }
+  ]
+}
