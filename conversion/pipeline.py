@@ -106,10 +106,26 @@ def describe(p: pathlib.Path) -> str:
 # ---------------------------------------------------------------- stages
 
 def stage_transcribe(cfg, work):
+    """OCR models and instruction-following models need different handling.
+
+    An OCR model returns a page of text; asking it for JSON, sentence numbers and a
+    paragraph map is asking for a job it was not built for, and it will guess. In OCR
+    mode we ask only for the text and split it deterministically in structure.py."""
     out_j, out_t = art(work, "1-transcript.json"), art(work, "1-transcript.mr.txt")
-    r = as_json(call(cfg["base_url"], cfg["model"],
-                     (PROMPTS / "transcribe.md").read_text(encoding="utf-8"),
-                     cfg["image"], 0.0, cfg["max_tokens"]), "transcribe")
+    if cfg["ocr"]:
+        raw = call(cfg["base_url"], cfg["model"],
+                   (PROMPTS / "transcribe_ocr.md").read_text(encoding="utf-8"),
+                   cfg["image"], 0.0, cfg["max_tokens"])
+        art(work, "0-ocr-raw.txt").write_text(raw, encoding="utf-8")
+        print(f"    wrote {rel(art(work,'0-ocr-raw.txt'))}  ({len(raw)} chars)")
+        from structure import structure
+        r = structure(raw)
+        print(f"    structured into {len(r['sentences'])} sentences in code, not by prompt")
+        print("    paragraph breaks are NOT recoverable from OCR — set paras by hand")
+    else:
+        r = as_json(call(cfg["base_url"], cfg["model"],
+                         (PROMPTS / "transcribe.md").read_text(encoding="utf-8"),
+                         cfg["image"], 0.0, cfg["max_tokens"]), "transcribe")
     save(out_j, r, cfg)
     lines = [f'{s["n"]}. {s["mr"]}' for s in r.get("sentences", [])]
     header = [f'# {r.get("title_mr","")}', f'# {r.get("date_label_mr","")}', ""]
@@ -132,13 +148,18 @@ def stage_translate(cfg, work):
 
 
 def stage_marks(cfg, work):
+    if cfg["ocr"] and cfg["marks_model"] == cfg["model"]:
+        print("    SKIPPED — an OCR model reads printed glyphs, not hand-drawn pencil.")
+        print("    Pass --marks-model <a vision-language model> to detect underlines,")
+        print("    or read them off the scan yourself.")
+        return
     tr = load(art(work, "1-transcript.json"))
     listing = "\n".join(f'{s["n"]}. {s["mr"]}' for s in tr["sentences"])
     prompt = (PROMPTS / "marks.md").read_text(encoding="utf-8") + "\n\nSENTENCES:\n" + listing
-    r = as_json(call(cfg["base_url"], cfg["model"], prompt, cfg["image"], 0.0,
+    r = as_json(call(cfg["base_url"], cfg["marks_model"], prompt, cfg["image"], 0.0,
                      cfg["max_tokens"]), "marks")
     r.setdefault("uncertain", [])
-    r["detected_by"] = f"MODEL:{cfg['model']}"
+    r["detected_by"] = f"MODEL:{cfg['marks_model']}"
     r["confirmed_by_human"] = False
     save(art(work, "3-marks.json"), r, cfg)
     print(f"    {len(r.get('underlined',[]))} underlined, {len(r['uncertain'])} uncertain")
@@ -160,7 +181,7 @@ def stage_merge(cfg, work):
                  "label_mr": tr.get("date_label_mr", ""), "label_en": ""},
         "title_mr": tr.get("title_mr", ""), "title_en": "",
         "source": {"page_image": cfg["image_rel"], "orthography": "original",
-                   "transcribed_by": f"MODEL:{cfg['model']}",
+                   "transcribed_by": f"MODEL:{cfg['model']}" + (" via structure.py" if cfg["ocr"] else ""),
                    "transcription_reviewed_by": None,
                    "translation_by": f"MODEL:{cfg['text_model']}" if en else None,
                    "translation_reviewed": False},
@@ -274,6 +295,11 @@ def main() -> None:
     ap.add_argument("--base-url", default=DEFAULT_URL)
     ap.add_argument("--model", default=DEFAULT_MODEL, help="vision model")
     ap.add_argument("--text-model", default=None)
+    ap.add_argument("--marks-model", default=None,
+                    help="model for underline detection (OCR models cannot do this)")
+    ap.add_argument("--ocr", action="store_true",
+                    help="treat --model as an OCR engine: ask for text, structure in code. "
+                         "Enabled automatically when the model name contains 'ocr'.")
     ap.add_argument("--max-tokens", type=int, default=8192)
     ap.add_argument("--only", choices=STAGES)
     ap.add_argument("--from", dest="start", choices=STAGES)
@@ -288,8 +314,11 @@ def main() -> None:
     work = (pathlib.Path(a.work) if a.work else ROOT / "work" / a.id).expanduser().resolve()
     work.mkdir(parents=True, exist_ok=True)
 
+    ocr = a.ocr or "ocr" in a.model.lower()
     cfg = {"id": a.id, "image": image, "base_url": a.base_url, "model": a.model,
-           "text_model": a.text_model or a.model, "max_tokens": a.max_tokens,
+           "text_model": a.text_model or a.model,
+           "marks_model": a.marks_model or a.model, "ocr": ocr,
+           "max_tokens": a.max_tokens,
            "promote": a.promote, "out_full": a.out_full, "out_summary": a.out_summary,
            "image_rel": f"source/pages/{a.id}{image.suffix.lower()}"}
 
@@ -308,7 +337,11 @@ def main() -> None:
 
     skipped = []
     print(f"\n{a.id}   {image.name}")
-    print(f"{provider_for(a.base_url)} · {a.base_url} · {a.model}\n")
+    print(f"{provider_for(a.base_url)} · {a.base_url} · {a.model}"
+          + ("   [OCR mode]" if ocr else ""))
+    if ocr and not a.marks_model:
+        print("no --marks-model: underline detection will be skipped")
+    print()
     for stage in todo:
         name = ARTIFACT[stage]
         existing = art(work, name) if name else None

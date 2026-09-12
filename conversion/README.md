@@ -41,6 +41,41 @@ python3 conversion/pipeline.py --image X.jpg --id 01-02 --from merge     # no mo
 python3 conversion/pipeline.py --image X.jpg --id 01-02 --force          # redo everything
 ```
 
+### OCR models are different
+
+`nvidia/baidu/paddleocr-vl` is an OCR engine, not an instruction-following model. Ask
+it for JSON with sentence numbers and a paragraph map and it will either ignore you
+or guess. So the pipeline treats it differently — automatically, when the model name
+contains `ocr`, or with `--ocr`:
+
+- it sends `prompts/transcribe_ocr.md`, which asks only for the text;
+- the raw response is kept at `work/<id>/0-ocr-raw.txt`;
+- **the splitting happens in `conversion/structure.py`**, in code, where it is testable.
+
+Round-tripped against the verified 2 January page — title, date and footnote
+recovered, and 13 of 13 body sentences byte-identical. The one difference is a real
+editorial call: our sentence 1 holds two questions, and the splitter separates them
+at the `?`. No text is lost either way.
+
+Two things OCR mode cannot give you:
+
+- **Paragraph breaks.** They are not in the text stream. `paras` comes back as one
+  block covering every sentence; split it by reading the scan.
+- **Underlines.** An OCR model reads printed glyphs, not pencil. The marks stage is
+  skipped unless you pass `--marks-model` naming a vision-language model.
+
+```bash
+python3 conversion/pipeline.py --image scan.jpg --id 01-02 \
+    --base-url https://inference-api.nvidia.com/v1 \
+    --model nvidia/baidu/paddleocr-vl \
+    --marks-model gcp/google/gemini-3.8-flash \
+    --text-model nvidia/moonshotai/kimi-k3 \
+    --out-full renders/jan02-ocr.html
+```
+
+That splits the work three ways: OCR transcribes, a vision-language model reads the
+pencil, a large text model translates and drafts the summary.
+
 ### Which endpoint
 
 `--base-url` decides the API shape. Anything containing `anthropic.com` speaks the
