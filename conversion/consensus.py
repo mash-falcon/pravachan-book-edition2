@@ -51,7 +51,7 @@ def norm(s: str) -> str:
 def run_transcribe(model, cfg):
     is_ocr = "ocr" in model.lower()
     prompt = (PROMPTS / ("transcribe_ocr.md" if is_ocr else "transcribe.md")).read_text(encoding="utf-8")
-    raw = call(cfg["base_url"], model, prompt, cfg["image"], 0.0, cfg["max_tokens"])
+    raw = call(cfg["base_url"], model, prompt, cfg["image"], None, cfg["max_tokens"])
     r = structure(raw) if is_ocr else as_json(raw, "transcribe")
     return {"sentences": [norm(s["mr"]) for s in r.get("sentences", [])],
             "title": norm(r.get("title_mr", "")), "raw": r}
@@ -101,7 +101,7 @@ def consensus_transcribe(results):
 def run_marks(model, cfg, sentences):
     listing = "\n".join(f"{i+1}. {s}" for i, s in enumerate(sentences))
     prompt = (PROMPTS / "marks.md").read_text(encoding="utf-8") + "\n\nSENTENCES:\n" + listing
-    r = as_json(call(cfg["base_url"], model, prompt, cfg["image"], 0.0, cfg["max_tokens"]), "marks")
+    r = as_json(call(cfg["base_url"], model, prompt, cfg["image"], None, cfg["max_tokens"]), "marks")
     return {"underlined": sorted(set(r.get("underlined", []))),
             "uncertain": sorted(set(r.get("uncertain", [])))}
 

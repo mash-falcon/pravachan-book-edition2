@@ -73,6 +73,7 @@ def _post(url: str, body: dict, headers: dict) -> dict:
 
 
 def _call_anthropic(base_url, model, prompt, image, max_tokens) -> str:
+    # deliberately never sends temperature: newer models reject it
     """Anthropic Messages API. Raw HTTP so this stays dependency-free."""
     if not ANTHROPIC_KEY:
         raise SystemExit("ANTHROPIC_API_KEY is not set")
@@ -96,7 +97,7 @@ def _call_anthropic(base_url, model, prompt, image, max_tokens) -> str:
 
 
 def call(base_url: str, model: str, prompt: str, image: pathlib.Path | None,
-         temperature: float, max_tokens: int = 16384) -> str:
+         temperature: float | None = None, max_tokens: int = 16384) -> str:
     if provider_for(base_url) == "anthropic":
         return _call_anthropic(base_url, model, prompt, image, max_tokens)
     content = [{"type": "text", "text": prompt}]
@@ -105,13 +106,17 @@ def call(base_url: str, model: str, prompt: str, image: pathlib.Path | None,
         b64 = base64.b64encode(image.read_bytes()).decode()
         content.append({"type": "image_url",
                         "image_url": {"url": f"data:{mime};base64,{b64}"}})
-    body = json.dumps({
+    payload_body = {
         "model": model,
         "messages": [{"role": "user", "content": content}],
-        "temperature": temperature,
         "max_tokens": max_tokens,
         "stream": False,
-    }).encode()
+    }
+    # Newer models reject `temperature` outright. Omit it unless it was asked for,
+    # and drop it if the server objects rather than failing the whole call.
+    if temperature is not None:
+        payload_body["temperature"] = temperature
+    body = json.dumps(payload_body).encode()
     req = urllib.request.Request(
         base_url.rstrip("/") + "/chat/completions", data=body,
         headers={"Content-Type": "application/json",
@@ -120,8 +125,13 @@ def call(base_url: str, model: str, prompt: str, image: pathlib.Path | None,
         with urllib.request.urlopen(req, timeout=1800) as r:
             payload = json.loads(r.read())
     except urllib.error.HTTPError as e:
-        raise SystemExit(f"HTTP {e.code} from {base_url}\n"
-                         + e.read().decode(errors="replace")[:600])
+        detail = e.read().decode(errors="replace")
+        if "temperature" in detail and "temperature" in payload_body:
+            print("    note: this model rejects `temperature` — retrying without it",
+                  file=sys.stderr)
+            payload_body.pop("temperature")
+            return _retry(base_url, payload_body, max_tokens)
+        raise SystemExit(f"HTTP {e.code} from {base_url}\n" + detail[:600])
     except urllib.error.URLError as e:
         raise SystemExit(f"cannot reach {base_url}: {e.reason}\n"
                          f"Check PRAVACHAN_BASE_URL. Try: python3 conversion/probe.py --list")
@@ -155,6 +165,26 @@ def salvage(text: str) -> dict | None:
     if m:
         out["footnote"] = {"marker": m.group(1), "mr": m.group(2)}
     return out
+
+
+def _retry(base_url: str, body: dict, max_tokens: int) -> str:
+    req = urllib.request.Request(
+        base_url.rstrip("/") + "/chat/completions", data=json.dumps(body).encode(),
+        headers={"Content-Type": "application/json",
+                 "Authorization": f"Bearer {API_KEY}"})
+    try:
+        with urllib.request.urlopen(req, timeout=1800) as r:
+            payload = json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        raise SystemExit(f"HTTP {e.code} from {base_url}\n"
+                         + e.read().decode(errors="replace")[:600])
+    choices = payload.get("choices") or []
+    if not choices:
+        raise SystemExit("the model returned no completion.\n"
+                         + json.dumps(payload, ensure_ascii=False)[:400])
+    if choices[0].get("finish_reason") == "length":
+        print("    WARNING: response hit the token limit and was cut off.", file=sys.stderr)
+    return choices[0]["message"]["content"]
 
 
 def as_json(task_or_text, task: str = None):

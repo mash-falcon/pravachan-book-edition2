@@ -115,7 +115,7 @@ def stage_transcribe(cfg, work):
     if cfg["ocr"]:
         raw = call(cfg["base_url"], cfg["model"],
                    (PROMPTS / "transcribe_ocr.md").read_text(encoding="utf-8"),
-                   cfg["image"], 0.0, cfg["max_tokens"])
+                   cfg["image"], None, cfg["max_tokens"])
         art(work, "0-ocr-raw.txt").write_text(raw, encoding="utf-8")
         print(f"    wrote {rel(art(work,'0-ocr-raw.txt'))}  ({len(raw)} chars)")
         from structure import structure
@@ -125,7 +125,7 @@ def stage_transcribe(cfg, work):
     else:
         r = as_json(call(cfg["base_url"], cfg["model"],
                          (PROMPTS / "transcribe.md").read_text(encoding="utf-8"),
-                         cfg["image"], 0.0, cfg["max_tokens"]), "transcribe")
+                         cfg["image"], None, cfg["max_tokens"]), "transcribe")
     save(out_j, r, cfg)
     lines = [f'{s["n"]}. {s["mr"]}' for s in r.get("sentences", [])]
     header = [f'# {r.get("title_mr","")}', f'# {r.get("date_label_mr","")}', ""]
@@ -139,7 +139,7 @@ def stage_translate(cfg, work):
     tr = load(art(work, "1-transcript.json"))
     listing = "\n".join(f'{s["n"]}. {s["mr"]}' for s in tr["sentences"])
     prompt = (PROMPTS / "translate.md").read_text(encoding="utf-8") + "\n\nSENTENCES:\n" + listing
-    r = as_json(call(cfg["base_url"], cfg["text_model"], prompt, None, 0.0,
+    r = as_json(call(cfg["base_url"], cfg["text_model"], prompt, None, None,
                      cfg["max_tokens"]), "translate")
     save(art(work, "2-english.json"), r, cfg)
     art(work, "2-english.txt").write_text(
@@ -156,7 +156,7 @@ def stage_marks(cfg, work):
     tr = load(art(work, "1-transcript.json"))
     listing = "\n".join(f'{s["n"]}. {s["mr"]}' for s in tr["sentences"])
     prompt = (PROMPTS / "marks.md").read_text(encoding="utf-8") + "\n\nSENTENCES:\n" + listing
-    r = as_json(call(cfg["base_url"], cfg["marks_model"], prompt, cfg["image"], 0.0,
+    r = as_json(call(cfg["base_url"], cfg["marks_model"], prompt, cfg["image"], None,
                      cfg["max_tokens"]), "marks")
     r.setdefault("uncertain", [])
     r["detected_by"] = f"MODEL:{cfg['marks_model']}"
@@ -229,7 +229,7 @@ def stage_summary(cfg, work):
     prompt = ((PROMPTS / "summary.md").read_text(encoding="utf-8")
               + f"\n\nTITLE: {day['title_mr']}\n\nDISCOURSE:\n{full}"
               + f"\n\nUNDERLINED SENTENCES: {nums}\n")
-    r = as_json(call(cfg["base_url"], cfg["text_model"], prompt, None, 0.0,
+    r = as_json(call(cfg["base_url"], cfg["text_model"], prompt, None, None,
                      cfg["max_tokens"]), "summary")
 
     allowed = {s["n"] for s in marked}
