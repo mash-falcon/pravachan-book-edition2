@@ -76,6 +76,28 @@ python3 conversion/pipeline.py --image scan.jpg --id 01-02 \
 That splits the work three ways: OCR transcribes, a vision-language model reads the
 pencil, a large text model translates and drafts the summary.
 
+### Which models actually work
+
+Before spending a page on a model, find out whether it answers at all and whether it
+can see an image:
+
+```bash
+export PRAVACHAN_BASE_URL=https://inference-api.nvidia.com/v1
+export PRAVACHAN_API_KEY=<your token>
+
+python3 conversion/ping.py --models conversion/models.example.txt --image
+```
+
+A bare `--image` sends a 1×1 pixel, which separates text-only models from
+vision-capable ones for almost nothing. The summary at the end lists which are
+usable for the transcribe and marks stages.
+
+`ping.py` prints the gateway's own error text. A hand-written snippet that indexes
+`response.json()["choices"]` without checking the status fails as
+`KeyError: 'choices'`, which says nothing — most often the cause is an unexpanded
+`"Bearer $API_KEY"` in a Python string, and `ping.py` detects that specific case and
+says so.
+
 ### Several models at once
 
 Different stages want different models, and `--recipe` names the set:
