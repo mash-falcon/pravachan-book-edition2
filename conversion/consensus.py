@@ -33,6 +33,11 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 PROMPTS = ROOT / "conversion" / "prompts"
 
 
+def rel_or(p: pathlib.Path) -> str:
+    p = pathlib.Path(p).resolve()
+    return str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p)
+
+
 def slug(m: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]+", "_", m).strip("_")
 
@@ -153,13 +158,26 @@ def main() -> None:
     print(f"\n{a.id}  {image.name}  ·  {a.stage}  ·  {len(models)} models")
     print(f"{provider_for(a.base_url)} · {a.base_url}\n")
 
-    sentences = None
+    sentences, truth, source = None, None, None
     if a.stage == "marks":
         tr = work / "1-transcript.json"
-        if not tr.exists():
-            sys.exit(f"{tr.name} is missing — marks compares against a transcript. "
-                     f"Run the transcribe stage first.")
-        sentences = [s["mr"] for s in json.loads(tr.read_text(encoding="utf-8"))["sentences"]]
+        day = ROOT / "content" / "days" / f"{a.id}.json"
+        if tr.exists():
+            sentences = [x["mr"] for x in json.loads(tr.read_text(encoding="utf-8"))["sentences"]]
+            source = str(tr.name)
+        elif day.exists():
+            # the verified sentences are a better reference than one model's transcription
+            d = json.loads(day.read_text(encoding="utf-8"))
+            sentences = [x["mr"] for x in d["sentences"]]
+            truth = sorted(x["n"] for x in d["sentences"] if x["highlight"])
+            source = f"content/days/{a.id}.json (verified)"
+        else:
+            sys.exit(f"No sentence list for {a.id}.\n"
+                     f"  Expected {rel_or(tr)} or content/days/{a.id}.json.\n"
+                     f"  Run the transcribe stage, or point --work at a directory that has one.")
+        print(f"sentences from {source}  ({len(sentences)})")
+        if truth:
+            print(f"recorded marks: {truth}\n")
 
     results = {}
     for m in models:
@@ -180,6 +198,14 @@ def main() -> None:
 
     out = (consensus_transcribe(results) if a.stage == "transcribe"
            else consensus_marks(results, len(sentences)))
+    if a.stage == "marks" and truth:
+        t = set(truth)
+        out["recorded_marks"] = truth
+        out["per_model_vs_recorded"] = {
+            m: {"found": sorted(set(r["underlined"]) & t),
+                "missed": sorted(t - set(r["underlined"])),
+                "invented": sorted(set(r["underlined"]) - t)}
+            for m, r in results.items()}
     out["_models"] = list(results)
     dest = work / f"consensus-{a.stage}.json"
     dest.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -199,6 +225,14 @@ def main() -> None:
                 print(f"    {','.join(v['models'])}:")
                 print(f"      {v['mr'][:110]}")
     else:
+        if out.get("recorded_marks") is not None:
+            print(f"recorded marks    : {out['recorded_marks']}")
+            for m, v in out["per_model_vs_recorded"].items():
+                bits = [f"found {len(v['found'])}/{len(out['recorded_marks'])}"]
+                if v["missed"]:   bits.append(f"missed {v['missed']}")
+                if v["invented"]: bits.append(f"INVENTED {v['invented']}")
+                print(f"    {m}: {', '.join(bits)}")
+            print()
         print(f"all models agree  : {out['all_models_agree']}")
         print(f"disputed          : {out['needs_review'] or 'none'}")
         for d in out["disputed"]:

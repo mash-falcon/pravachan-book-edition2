@@ -130,9 +130,25 @@ of lines where independent models disagree will.
 
 ```bash
 python3 conversion/consensus.py --image scan.jpg --id 01-02 --stage transcribe \
-    --models nvidia/baidu/paddleocr-vl,gcp/google/gemini-3.8-flash,xai/xai/grok-4.6
+    --models nvidia/baidu/paddleocr-vl,azure/openai/gpt-5.6-sol,aws/anthropic/bedrock-claude-opus-4-8
 python3 conversion/consensus.py --image scan.jpg --id 01-02 --stage marks --models ...
 ```
+
+The marks stage needs a sentence list. It uses `work/<id>/1-transcript.json` if one
+exists, and otherwise falls back to `content/days/<id>.json` — which is better, since
+those sentences are verified. When that file also records underlines, each model is
+scored against them:
+
+```
+recorded marks    : [2, 5, 7, 14]
+    model-A: found 4/4
+    model-B: found 4/4, INVENTED [8]
+    model-C: found 3/4, missed [5]
+```
+
+An invented mark is called out separately from a missed one on purpose: a miss loses
+information, an invention attributes something to the previous reader that they
+never wrote.
 
 Exercised against the verified 2 January page with three simulated models — one
 faithful, one making the `ठेवाचें`/`ठेवावें` slip Claude actually made, one
