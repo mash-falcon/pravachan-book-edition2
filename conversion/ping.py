@@ -51,7 +51,8 @@ def check_key() -> None:
                  "real token in the environment instead.")
 
 
-def ask(model: str, image: pathlib.Path | None, timeout: int) -> tuple[str, str]:
+def ask(model: str, image: pathlib.Path | None, timeout: int,
+        max_tokens: int = 256) -> tuple[str, str]:
     content = [{"type": "text", "text": "Reply with only: ok"}]
     if image is not None:
         data = base64.b64encode(image.read_bytes()).decode() if image.name != "-" \
@@ -59,7 +60,7 @@ def ask(model: str, image: pathlib.Path | None, timeout: int) -> tuple[str, str]
         mime = "image/png" if image.name == "-" or image.suffix.lower() == ".png" else "image/jpeg"
         content.append({"type": "image_url",
                         "image_url": {"url": f"data:{mime};base64,{data}"}})
-    body = json.dumps({"model": model, "max_tokens": 16,
+    body = json.dumps({"model": model, "max_tokens": max_tokens,
                        "messages": [{"role": "user", "content": content}]}).encode()
     req = urllib.request.Request(
         BASE_URL.rstrip("/") + "/chat/completions", data=body,
@@ -75,7 +76,7 @@ def ask(model: str, image: pathlib.Path | None, timeout: int) -> tuple[str, str]
                    else j.get("error")) or j.get("message") or detail
         except Exception:
             msg = detail
-        return "FAIL", f"HTTP {e.code}: {str(msg)[:120]}"
+        return "FAIL", f"HTTP {e.code}: {str(msg)[:400]}"
     except urllib.error.URLError as e:
         return "FAIL", f"unreachable: {e.reason}"
     except TimeoutError:
@@ -85,9 +86,14 @@ def ask(model: str, image: pathlib.Path | None, timeout: int) -> tuple[str, str]
     if choices is None:
         return "FAIL", f"no 'choices' in response — keys {list(payload)[:6]}"
     if not choices:
-        # a model can return 200 with zero completions: refused, filtered, or not a
-        # chat model at all. Show the body so the reason is visible.
-        return "FAIL", f"empty 'choices' — body {json.dumps(payload, ensure_ascii=False)[:150]}"
+        # Reasoning models spend the budget thinking and emit no text if it runs out.
+        # usage with completion tokens but no choices is that, not a broken model.
+        u = payload.get("usage") or {}
+        spent = u.get("completion_tokens") or u.get("total_tokens") or 0
+        if spent and max_tokens < 2048:
+            return "RETRY", f"produced {spent} tokens but no text — budget too small"
+        return "FAIL", ("empty 'choices' — body "
+                        + json.dumps(payload, ensure_ascii=False)[:300])
     text = ((choices[0].get("message") or {}).get("content") or "").strip()
     return ("ok", text[:40]) if text else ("ok", "(empty content)")
 
@@ -99,6 +105,8 @@ def main() -> None:
     ap.add_argument("--image", nargs="?", const="-", default=None,
                     help="also test vision; bare flag uses a 1x1 pixel")
     ap.add_argument("--timeout", type=int, default=120)
+    ap.add_argument("--max-tokens", type=int, default=256,
+                    help="reasoning models need room to answer at all (default 256)")
     a = ap.parse_args()
     check_key()
 
@@ -114,13 +122,18 @@ def main() -> None:
     for m in models:
         t0 = time.time()
         try:
-            status, note = ask(m, None, a.timeout)
+            status, note = ask(m, None, a.timeout, a.max_tokens)
+            if status == "RETRY":
+                print(f"  ...  {m}\n       {note}; retrying with 4096")
+                status, note = ask(m, None, a.timeout, 4096)
         except Exception as e:                      # one bad model must not end the sweep
             status, note = "FAIL", f"{type(e).__name__}: {e}"
         vis = ""
         if image is not None and status == "ok":
             try:
-                vstatus, vnote = ask(m, image, a.timeout)
+                vstatus, vnote = ask(m, image, a.timeout, max(a.max_tokens, 1024))
+                if vstatus == "RETRY":
+                    vstatus, vnote = ask(m, image, a.timeout, 4096)
             except Exception as e:
                 vstatus, vnote = "FAIL", f"{type(e).__name__}: {e}"
             vis = "sees images" if vstatus == "ok" else f"text only ({vnote[:60]})"

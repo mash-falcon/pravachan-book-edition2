@@ -92,6 +92,16 @@ A bare `--image` sends a 1×1 pixel, which separates text-only models from
 vision-capable ones for almost nothing. The summary at the end lists which are
 usable for the transcribe and marks stages.
 
+Two results are worth reading carefully rather than at face value:
+
+- **`empty 'choices'` with a usage block.** A reasoning model spends its budget
+  thinking and returns no text if the budget runs out. `ping.py` detects that shape
+  and retries with 4096 tokens before calling the model unusable. If you see it as a
+  final verdict, raise `--max-tokens`.
+- **"text only" on a model whose name says vision.** That is usually the gateway
+  rejecting the image encoding for that route, not the model lacking vision. Read
+  the HTTP error printed beneath it before ruling the model out.
+
 `ping.py` prints the gateway's own error text. A hand-written snippet that indexes
 `response.json()["choices"]` without checking the status fails as
 `KeyError: 'choices'`, which says nothing — most often the cause is an unexpanded
