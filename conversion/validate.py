@@ -68,6 +68,10 @@ def check_day(day_id, errors, warnings):
         if c.get("anchor") not in ns and c.get("anchor") != "fn":
             E(f"commentary anchored to sentence {c.get('anchor')}, which does not exist")
 
+    if d.get("source", {}).get("incomplete"):
+        E("transcription is INCOMPLETE — the model response was cut off. "
+          "Finish it before building.")
+
     img = ROOT / d.get("source", {}).get("page_image", "")
     if not img.exists():
         W(f"page image not present: {d.get('source', {}).get('page_image')}")

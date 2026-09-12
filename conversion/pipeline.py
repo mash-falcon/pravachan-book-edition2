@@ -183,6 +183,7 @@ def stage_merge(cfg, work):
         "source": {"page_image": cfg["image_rel"], "orthography": "original",
                    "transcribed_by": f"MODEL:{cfg['model']}" + (" via structure.py" if cfg["ocr"] else ""),
                    "transcription_reviewed_by": None,
+                   "incomplete": bool(load(art(work, "1-transcript.json")).get("_truncated")),
                    "translation_by": f"MODEL:{cfg['text_model']}" if en else None,
                    "translation_reviewed": False},
         "marks": {"kind": "inherited",
@@ -303,7 +304,7 @@ def main() -> None:
     ap.add_argument("--ocr", action="store_true",
                     help="treat --model as an OCR engine: ask for text, structure in code. "
                          "Enabled automatically when the model name contains 'ocr'.")
-    ap.add_argument("--max-tokens", type=int, default=8192)
+    ap.add_argument("--max-tokens", type=int, default=16384)
     ap.add_argument("--only", choices=STAGES)
     ap.add_argument("--from", dest="start", choices=STAGES)
     ap.add_argument("--force", action="store_true")

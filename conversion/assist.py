@@ -96,7 +96,7 @@ def _call_anthropic(base_url, model, prompt, image, max_tokens) -> str:
 
 
 def call(base_url: str, model: str, prompt: str, image: pathlib.Path | None,
-         temperature: float, max_tokens: int = 8192) -> str:
+         temperature: float, max_tokens: int = 16384) -> str:
     if provider_for(base_url) == "anthropic":
         return _call_anthropic(base_url, model, prompt, image, max_tokens)
     content = [{"type": "text", "text": prompt}]
@@ -136,8 +136,30 @@ def call(base_url: str, model: str, prompt: str, image: pathlib.Path | None,
     return choice["message"]["content"]
 
 
-def as_json(text: str, task: str):
+def salvage(text: str) -> dict | None:
+    """Recover what is complete from a truncated JSON response.
+
+    A page of Devanagari can exhaust the token budget partway through. The sentences
+    that did arrive are perfectly good — discarding them and re-running costs a whole
+    call to reproduce work already paid for."""
+    sents = [{"n": int(n), "mr": mr} for n, mr in
+             re.findall(r'\{\s*"n"\s*:\s*(\d+)\s*,\s*"mr"\s*:\s*"((?:[^"\\]|\\.)*)"\s*\}', text)]
+    if not sents:
+        return None
+    out = {"sentences": sents, "_truncated": True}
+    for key, field in (("title_mr", "title_mr"), ("date_label_mr", "date_label_mr")):
+        m = re.search(rf'"{key}"\s*:\s*"((?:[^"\\]|\\.)*)"', text)
+        if m:
+            out[field] = m.group(1)
+    m = re.search(r'"footnote"\s*:\s*\{\s*"marker"\s*:\s*"([^"]*)"\s*,\s*"mr"\s*:\s*"((?:[^"\\]|\\.)*)"\s*\}', text)
+    if m:
+        out["footnote"] = {"marker": m.group(1), "mr": m.group(2)}
+    return out
+
+
+def as_json(task_or_text, task: str = None):
     """Small models like to wrap JSON in prose or a fence. Dig it out rather than fail."""
+    text = task_or_text
     text = text.strip()
     fence = re.search(r"```(?:json)?\s*(.*?)```", text, re.S)
     if fence:
@@ -148,7 +170,15 @@ def as_json(text: str, task: str):
     try:
         return json.loads(text)
     except json.JSONDecodeError as e:
+        part = salvage(text)
+        if part:
+            print(f"    {task}: response was cut off — salvaged "
+                  f"{len(part['sentences'])} complete sentence(s) from it.", file=sys.stderr)
+            print("    The page is INCOMPLETE. Re-run with a larger --max-tokens, or "
+                  "finish it by hand.", file=sys.stderr)
+            return part
         bad = DRAFTS / f"_failed-{task}.txt"
+        bad.parent.mkdir(parents=True, exist_ok=True)
         bad.write_text(text, encoding="utf-8")
         raise SystemExit(f"{task}: model did not return valid JSON ({e}).\n"
                          f"Raw output saved to {bad.relative_to(ROOT)}")
@@ -156,7 +186,7 @@ def as_json(text: str, task: str):
 
 def run(day_id: str, tasks: list[str], base_url: str, model: str,
         text_model: str, temperature: float, out: str | None = None,
-        max_tokens: int = 8192) -> None:
+        max_tokens: int = 16384) -> None:
     DRAFTS.mkdir(exist_ok=True)
     out_path = pathlib.Path(out) if out else DRAFTS / f"{day_id}.json"
     draft = json.loads(out_path.read_text(encoding="utf-8")) if out_path.exists() else {

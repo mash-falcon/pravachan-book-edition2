@@ -139,7 +139,7 @@ def main() -> None:
     ap.add_argument("--image", help="use this image instead")
     ap.add_argument("--task", choices=["transcribe", "marks", "translate"], default="transcribe")
     ap.add_argument("--prompt", help="send this instead of the task prompt")
-    ap.add_argument("--max-tokens", type=int, default=8192,
+    ap.add_argument("--max-tokens", type=int, default=16384,
                     help="Devanagari is token-hungry; 1024 truncates a full page (default 8192)")
     ap.add_argument("--temperature", type=float, default=0.0)
     a = ap.parse_args()

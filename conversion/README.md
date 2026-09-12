@@ -348,9 +348,14 @@ standard library.
 
 ### max_tokens
 
-A full page of Devanagari does not fit in 1024 tokens. The default here is **8192**,
-and both `probe.py` and `assist.py` warn when `finish_reason` comes back as `length`.
-If a model returns half a page, that is usually the cause, not the model.
+Devanagari is far more token-hungry than Latin, and a JSON transcription of one page
+carries the text twice over in structure. **8192 was not enough** — a real run cut
+off mid-sentence 14 of 18. The default is now **16384**.
+
+When a response is cut off anyway, the complete sentences are **salvaged** rather
+than discarded: re-running costs another call to reproduce work already paid for. A
+salvaged page is marked `source.incomplete: true`, and `validate.py` treats that as
+an error, so a half-transcribed day cannot quietly render as if it were whole.
 
 ## Comparing models
 
