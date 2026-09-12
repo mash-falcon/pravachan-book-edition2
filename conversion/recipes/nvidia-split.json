@@ -1,0 +1,12 @@
+{
+  "_comment": "Each stage to the model that suits it. Used with: --recipe conversion/recipes/nvidia-split.json",
+  "base_url": "https://inference-api.nvidia.com/v1",
+  "model": "nvidia/baidu/paddleocr-vl",
+  "marks_model": "gcp/google/gemini-3.8-flash",
+  "text_model": "nvidia/moonshotai/kimi-k3",
+  "_why": {
+    "model": "OCR engine — reads printed glyphs better than a general VLM, structured in code",
+    "marks_model": "vision-language model — an OCR engine cannot see hand-drawn pencil",
+    "text_model": "large text model — translation and the summary need no image"
+  }
+}

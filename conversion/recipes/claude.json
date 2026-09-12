@@ -1,0 +1,7 @@
+{
+  "_comment": "One model for everything, via the Anthropic API. Needs ANTHROPIC_API_KEY.",
+  "base_url": "https://api.anthropic.com/v1",
+  "model": "claude-sonnet-5",
+  "marks_model": "claude-sonnet-5",
+  "text_model": "claude-sonnet-5"
+}

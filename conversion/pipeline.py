@@ -297,6 +297,9 @@ def main() -> None:
     ap.add_argument("--text-model", default=None)
     ap.add_argument("--marks-model", default=None,
                     help="model for underline detection (OCR models cannot do this)")
+    ap.add_argument("--recipe", default=None,
+                    help="JSON file setting base_url and the per-stage models; "
+                         "explicit flags still win")
     ap.add_argument("--ocr", action="store_true",
                     help="treat --model as an OCR engine: ask for text, structure in code. "
                          "Enabled automatically when the model name contains 'ocr'.")
@@ -307,6 +310,17 @@ def main() -> None:
     ap.add_argument("--promote", action="store_true",
                     help="copy the merged day into content/days/ (do this after reading it)")
     a = ap.parse_args()
+
+    if a.recipe:
+        rec = json.loads(pathlib.Path(a.recipe).read_text(encoding="utf-8"))
+        given = set(sys.argv)
+        for key in ("base_url", "model", "marks_model", "text_model"):
+            flag = "--" + key.replace("_", "-")
+            if key in rec and flag not in given:      # an explicit flag beats the recipe
+                setattr(a, key, rec[key])
+        print(f"recipe {pathlib.Path(a.recipe).name}: "
+              + ", ".join(f"{k}={rec[k]}" for k in ("model", "marks_model", "text_model")
+                          if k in rec))
 
     image = pathlib.Path(a.image).expanduser().resolve()
     if not image.exists():

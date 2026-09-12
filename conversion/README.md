@@ -76,6 +76,59 @@ python3 conversion/pipeline.py --image scan.jpg --id 01-02 \
 That splits the work three ways: OCR transcribes, a vision-language model reads the
 pencil, a large text model translates and drafts the summary.
 
+### Several models at once
+
+Different stages want different models, and `--recipe` names the set:
+
+```bash
+python3 conversion/pipeline.py --image scan.jpg --id 01-02 \
+    --recipe conversion/recipes/nvidia-split.json --out-full renders/jan02.html
+```
+
+`conversion/recipes/nvidia-split.json` sends OCR to `paddleocr-vl`, underline
+detection to a vision-language model, and translation plus summary to a large text
+model. Explicit flags still override the recipe.
+
+### Using disagreement to target review
+
+`conversion/consensus.py` runs several models over the same page and reports where
+they differ. The point is not a better answer by vote — it is knowing **where to
+look**. Reading all 365 pages against the scan will not happen; reading the handful
+of lines where independent models disagree will.
+
+```bash
+python3 conversion/consensus.py --image scan.jpg --id 01-02 --stage transcribe \
+    --models nvidia/baidu/paddleocr-vl,gcp/google/gemini-3.8-flash,xai/xai/grok-4.6
+python3 conversion/consensus.py --image scan.jpg --id 01-02 --stage marks --models ...
+```
+
+Exercised against the verified 2 January page with three simulated models — one
+faithful, one making the `ठेवाचें`/`ठेवावें` slip Claude actually made, one
+modernising `नांव` to `नाव`:
+
+```
+unanimous   : 12/14
+need a human: [2, 9]
+  [9]  A,C: म्हणून नामाचें साधन चालू ठेवावें.
+       B  : म्हणून नामाचें साधन चालू ठेवाचें.
+```
+
+Two sentences to check instead of fourteen, and both real errors surfaced. On marks
+it reports what every model agreed on and what only some marked:
+
+```
+all models agree : [2, 5, 7, 14]
+disputed         : [9]   marked by [C], not by [A, B]
+```
+
+Nothing here writes to `content/`. Consensus never picks a winner on a contested
+item — it records every variant and leaves the decision to a person with the scan.
+
+**Agreement is not correctness.** It means the models failed the same way or not at
+all — three models sharing a training bias toward modern spelling will agree
+confidently and be wrong together. Disagreement is the reliable signal; agreement
+only narrows where to spend attention.
+
 ### Which endpoint
 
 `--base-url` decides the API shape. Anything containing `anthropic.com` speaks the
