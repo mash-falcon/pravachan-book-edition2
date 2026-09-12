@@ -14,7 +14,7 @@ Standard library only; no `requests`, no SDK, nothing to pip install.
 
 Environment:
     PRAVACHAN_BASE_URL   e.g. https://inference-api.nvidia.com/v1
-    PRAVACHAN_API_KEY    your token
+    PRAVACHAN_API_KEY    your token (falls back to NVIDIA_API_KEY, OPENAI_API_KEY)
 """
 import argparse, base64, collections, json, os, pathlib, re, sys, time
 import urllib.request, urllib.error
@@ -25,7 +25,20 @@ PROBES = ROOT / "content" / "drafts" / "probes"
 PAGES = ROOT / "source" / "pages"
 
 BASE_URL = os.environ.get("PRAVACHAN_BASE_URL", "http://localhost:11434/v1")
-API_KEY = os.environ.get("PRAVACHAN_API_KEY", "local")
+def _api_key() -> str:
+    """Read the token from whichever variable is already set.
+
+    PRAVACHAN_API_KEY exists so the project can be pointed at any gateway, but most
+    people already have a provider key exported. Requiring a new name for the same
+    secret is friction for nothing."""
+    for name in ("PRAVACHAN_API_KEY", "NVIDIA_API_KEY", "OPENAI_API_KEY"):
+        v = os.environ.get(name)
+        if v and not v.startswith("$"):
+            return v
+    return "local"          # most local servers ignore it entirely
+
+
+API_KEY = _api_key()
 
 # Book form -> modern form.
 # STRONG pairs: the modern spelling has no other reading, so seeing it is real

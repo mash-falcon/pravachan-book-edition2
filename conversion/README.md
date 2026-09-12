@@ -83,7 +83,7 @@ can see an image:
 
 ```bash
 export PRAVACHAN_BASE_URL=https://inference-api.nvidia.com/v1
-export PRAVACHAN_API_KEY=<your token>
+export PRAVACHAN_API_KEY="$NVIDIA_API_KEY"      # or paste the token
 
 python3 conversion/ping.py --models conversion/models.example.txt --image
 ```
@@ -249,7 +249,10 @@ python3 conversion/validate.py 01-02 && python3 tools/build.py 01-02
 ```
 
 Configuration is by flag or environment: `PRAVACHAN_BASE_URL` (default
-`http://localhost:11434/v1`), `PRAVACHAN_MODEL`, `PRAVACHAN_API_KEY`.
+`http://localhost:11434/v1`), `PRAVACHAN_MODEL`, and `PRAVACHAN_API_KEY` — which is
+simply the token you would send as `Authorization: Bearer <token>`. If
+`NVIDIA_API_KEY` or `OPENAI_API_KEY` is already exported, it is used automatically
+and you need not set a project-specific name at all.
 Use `--text-model` to translate with a different, larger model than the vision one.
 
 Against a hosted gateway rather than a local server, set both:

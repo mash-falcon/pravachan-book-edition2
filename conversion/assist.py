@@ -16,7 +16,8 @@ produces reaches the readers unreviewed.
 Environment:
     PRAVACHAN_BASE_URL   default http://localhost:11434/v1
     PRAVACHAN_MODEL      default qwen2.5vl:7b
-    PRAVACHAN_API_KEY    default "local" (most local servers ignore it)
+    PRAVACHAN_API_KEY    your token; falls back to NVIDIA_API_KEY, then
+                         OPENAI_API_KEY, then "local" for servers that ignore it
 """
 import argparse, base64, json, os, pathlib, re, sys, urllib.request, urllib.error
 
@@ -27,7 +28,20 @@ PAGES = ROOT / "source" / "pages"
 
 DEFAULT_URL = os.environ.get("PRAVACHAN_BASE_URL", "http://localhost:11434/v1")
 DEFAULT_MODEL = os.environ.get("PRAVACHAN_MODEL", "qwen2.5vl:7b")
-API_KEY = os.environ.get("PRAVACHAN_API_KEY", "local")
+def _api_key() -> str:
+    """Read the token from whichever variable is already set.
+
+    PRAVACHAN_API_KEY exists so the project can be pointed at any gateway, but most
+    people already have a provider key exported. Requiring a new name for the same
+    secret is friction for nothing."""
+    for name in ("PRAVACHAN_API_KEY", "NVIDIA_API_KEY", "OPENAI_API_KEY"):
+        v = os.environ.get(name)
+        if v and not v.startswith("$"):
+            return v
+    return "local"          # most local servers ignore it entirely
+
+
+API_KEY = _api_key()
 ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
 

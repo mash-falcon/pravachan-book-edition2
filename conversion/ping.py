@@ -14,12 +14,26 @@ print the gateway's own message instead.
 
 Environment:
     PRAVACHAN_BASE_URL   default http://localhost:11434/v1
-    PRAVACHAN_API_KEY    your token — NOT the literal string "$API_KEY"
+    PRAVACHAN_API_KEY    your token (falls back to NVIDIA_API_KEY, OPENAI_API_KEY). NVIDIA_API_KEY or OPENAI_API_KEY are used as
+                         fallbacks, so an existing provider key already works.
 """
 import argparse, base64, json, os, pathlib, sys, time, urllib.request, urllib.error
 
 BASE_URL = os.environ.get("PRAVACHAN_BASE_URL", "http://localhost:11434/v1")
-API_KEY = os.environ.get("PRAVACHAN_API_KEY", "")
+def _api_key() -> str:
+    """Read the token from whichever variable is already set.
+
+    PRAVACHAN_API_KEY exists so the project can be pointed at any gateway, but most
+    people already have a provider key exported. Requiring a new name for the same
+    secret is friction for nothing."""
+    for name in ("PRAVACHAN_API_KEY", "NVIDIA_API_KEY", "OPENAI_API_KEY"):
+        v = os.environ.get(name)
+        if v and not v.startswith("$"):
+            return v
+    return "local"          # most local servers ignore it entirely
+
+
+API_KEY = _api_key()
 
 # a 1x1 PNG — enough to learn whether a model accepts images at all
 ONE_PIXEL = base64.b64decode(
@@ -27,11 +41,12 @@ ONE_PIXEL = base64.b64decode(
 
 
 def check_key() -> None:
-    if not API_KEY:
-        sys.exit("PRAVACHAN_API_KEY is not set.\n"
-                 "  export PRAVACHAN_API_KEY=<your token>")
-    if API_KEY.startswith("$") or API_KEY in ("$API_KEY", "$NVIDIA_API_KEY"):
-        sys.exit(f"PRAVACHAN_API_KEY is the literal text {API_KEY!r}.\n"
+    if API_KEY == "local":
+        sys.exit("No API key found.\n"
+                 "  export PRAVACHAN_API_KEY=<token>     (or NVIDIA_API_KEY / OPENAI_API_KEY)\n"
+                 "It is the same value you would put after 'Bearer ' in a request.")
+    if API_KEY.startswith("$"):
+        sys.exit(f"The API key is the literal text {API_KEY!r}.\n"
                  "A shell variable inside a Python string is not expanded — set the\n"
                  "real token in the environment instead.")
 
