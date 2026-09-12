@@ -107,7 +107,13 @@ def run_marks(model, cfg, sentences):
 
 
 def consensus_marks(results, n_sentences):
-    models = list(results)
+    # A model that marks almost everything has not detected anything. Keep its answer
+    # on record but exclude it, or it drags every sentence into "disputed".
+    degenerate = [m for m, r in results.items()
+                  if n_sentences and len(r["underlined"]) >= 0.7 * n_sentences]
+    usable = {m: r for m, r in results.items() if m not in degenerate}
+    models = list(usable) or list(results)
+    results = usable or results
     votes = collections.Counter()
     for m in models:
         votes.update(results[m]["underlined"])
@@ -119,6 +125,7 @@ def consensus_marks(results, n_sentences):
             some.append(n)
     return {
         "per_model": {m: results[m]["underlined"] for m in models},
+        "excluded_as_degenerate": degenerate,
         "all_models_agree": every,
         "disputed": [{"n": n, "marked_by": [m for m in models if n in results[m]["underlined"]],
                       "not_marked_by": [m for m in models if n not in results[m]["underlined"]]}
@@ -204,7 +211,7 @@ def main() -> None:
         out["per_model_vs_recorded"] = {
             m: {"found": sorted(set(r["underlined"]) & t),
                 "missed": sorted(t - set(r["underlined"])),
-                "invented": sorted(set(r["underlined"]) - t)}
+                "extra": sorted(set(r["underlined"]) - t)}
             for m, r in results.items()}
     out["_models"] = list(results)
     dest = work / f"consensus-{a.stage}.json"
@@ -226,13 +233,24 @@ def main() -> None:
                 print(f"      {v['mr'][:110]}")
     else:
         if out.get("recorded_marks") is not None:
-            print(f"recorded marks    : {out['recorded_marks']}")
+            print(f"recorded marks    : {out['recorded_marks']}"
+                  "   (a record, not ground truth — it can be incomplete)")
             for m, v in out["per_model_vs_recorded"].items():
                 bits = [f"found {len(v['found'])}/{len(out['recorded_marks'])}"]
-                if v["missed"]:   bits.append(f"missed {v['missed']}")
-                if v["invented"]: bits.append(f"INVENTED {v['invented']}")
+                if v["missed"]: bits.append(f"not in record {v['missed']}")
+                if v["extra"]:  bits.append(f"extra {v['extra']}")
                 print(f"    {m}: {', '.join(bits)}")
             print()
+        if out.get("recorded_marks") is not None:
+            extra_all = set.intersection(*[set(v["extra"]) for v in
+                                           out["per_model_vs_recorded"].values()]) \
+                        if out["per_model_vs_recorded"] else set()
+            if extra_all:
+                print(f"    EVERY model marks {sorted(extra_all)}, which the record omits —")
+                print("    check the scan there before assuming the models are wrong.\n")
+        if out.get("excluded_as_degenerate"):
+            print(f"excluded          : {out['excluded_as_degenerate']}")
+            print("                    marked 70%+ of the page — that is not detection\n")
         print(f"all models agree  : {out['all_models_agree']}")
         print(f"disputed          : {out['needs_review'] or 'none'}")
         for d in out["disputed"]:

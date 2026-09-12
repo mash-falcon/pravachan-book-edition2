@@ -21,13 +21,13 @@
   "marks": {
     "kind": "inherited",
     "by": "an unidentified previous reader of this copy",
-    "count_passages": 4,
-    "detected_by": "read from the scan during the session that produced this file",
+    "count_passages": 5,
+    "detected_by": "read from the scan in-session; sentence 13 added after three models flagged it",
     "confirmed_by_human": false,
     "uncertain": [
       8
     ],
-    "note": "Sentence 8 may also be underlined; the rule there is hard to separate from the one above it. Confirm all five against the scan."
+    "note": "Sentence 13 was missed on the first reading — its underline runs across a row break and was mistaken for sentence 14's. Three independent models caught it. Sentence 8 remains unsettled."
   },
   "paras": [
     [
@@ -120,7 +120,7 @@
       "n": 13,
       "mr": "भगवंताचें अनुसंधान व अखंड नामस्मरण याशिवाय त्यांना कोणतीहि गोष्ट प्रिय नाहीं.",
       "en": "Nothing whatever is dear to them except unbroken attention to God and ceaseless remembrance of the Name.",
-      "highlight": 0
+      "highlight": 1
     },
     {
       "n": 14,
