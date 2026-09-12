@@ -125,7 +125,11 @@ def call(base_url: str, model: str, prompt: str, image: pathlib.Path | None,
     except urllib.error.URLError as e:
         raise SystemExit(f"cannot reach {base_url}: {e.reason}\n"
                          f"Check PRAVACHAN_BASE_URL. Try: python3 conversion/probe.py --list")
-    choice = payload["choices"][0]
+    choices = payload.get("choices") or []
+    if not choices:
+        raise SystemExit("the model returned no completion.\n"
+                         + json.dumps(payload, ensure_ascii=False)[:400])
+    choice = choices[0]
     if choice.get("finish_reason") == "length":
         print("    WARNING: response hit the token limit and was cut off. "
               "Re-run with a larger --max-tokens.", file=sys.stderr)

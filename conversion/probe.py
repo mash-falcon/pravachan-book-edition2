@@ -191,7 +191,11 @@ def main() -> None:
     payload = http("POST", "/chat/completions", body)
     secs = time.time() - t0
 
-    choice = payload["choices"][0]
+    choices = payload.get("choices") or []
+    if not choices:
+        raise SystemExit("the model returned no completion.\n"
+                         + json.dumps(payload, ensure_ascii=False)[:400])
+    choice = choices[0]
     text = choice["message"]["content"] or ""
     usage = payload.get("usage", {})
     finish = choice.get("finish_reason")

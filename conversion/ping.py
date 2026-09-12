@@ -81,9 +81,15 @@ def ask(model: str, image: pathlib.Path | None, timeout: int) -> tuple[str, str]
     except TimeoutError:
         return "FAIL", f"timed out after {timeout}s"
 
-    if "choices" not in payload:                # the KeyError, caught and explained
-        return "FAIL", f"no 'choices' in response — got keys {list(payload)[:6]}"
-    return "ok", (payload["choices"][0]["message"].get("content") or "").strip()[:40]
+    choices = payload.get("choices")
+    if choices is None:
+        return "FAIL", f"no 'choices' in response — keys {list(payload)[:6]}"
+    if not choices:
+        # a model can return 200 with zero completions: refused, filtered, or not a
+        # chat model at all. Show the body so the reason is visible.
+        return "FAIL", f"empty 'choices' — body {json.dumps(payload, ensure_ascii=False)[:150]}"
+    text = ((choices[0].get("message") or {}).get("content") or "").strip()
+    return ("ok", text[:40]) if text else ("ok", "(empty content)")
 
 
 def main() -> None:
@@ -107,11 +113,17 @@ def main() -> None:
     rows = []
     for m in models:
         t0 = time.time()
-        status, note = ask(m, None, a.timeout)
+        try:
+            status, note = ask(m, None, a.timeout)
+        except Exception as e:                      # one bad model must not end the sweep
+            status, note = "FAIL", f"{type(e).__name__}: {e}"
         vis = ""
         if image is not None and status == "ok":
-            vstatus, vnote = ask(m, image, a.timeout)
-            vis = "sees images" if vstatus == "ok" else f"text only ({vnote[:50]})"
+            try:
+                vstatus, vnote = ask(m, image, a.timeout)
+            except Exception as e:
+                vstatus, vnote = "FAIL", f"{type(e).__name__}: {e}"
+            vis = "sees images" if vstatus == "ok" else f"text only ({vnote[:60]})"
         rows.append((m, status, f"{time.time()-t0:.1f}s", note, vis))
         print(f"  {status:<4} {m}")
         if status != "ok":
