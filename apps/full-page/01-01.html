@@ -222,6 +222,26 @@ body[data-marks="off"] .prov{opacity:.25}
   .margin{border-top:1px solid var(--rule);padding-top:1.3rem}
   .drawer{width:100%}
 }
+/* phone. The toolbar is eight controls wide; at 390px it wraps to three rows and,
+   being sticky, eats a third of the screen before a word is read. Give the text the
+   screen: the bar scrolls away, and the page-fit badge — which reports a desktop
+   typesetting measurement that is switched off here anyway — goes entirely. */
+@media(max-width:700px){
+  body{padding:0 .55rem 2.5rem;-webkit-text-size-adjust:100%}
+  .bar{position:static;padding:.5rem 0 .2rem;gap:.3rem}
+  .bar .fitbadge,.grow{display:none}
+  .brand{font-size:.9rem;width:100%;margin-bottom:.15rem}
+  .brand small{font-size:.5rem;letter-spacing:.16em}
+  .btn,.seg button{font-size:.66rem;padding:.3rem .58rem}
+  .sheet{padding:2.4rem .95rem 1.6rem;margin-top:.4rem}
+  .runhead{top:1rem;left:.95rem;right:.95rem;font-size:.5rem;letter-spacing:.16em}
+  /* justified Devanagari on a ~34-character measure opens rivers between the words */
+  .body{text-align:left;line-height:2}
+  .body p.t{text-indent:1.2em}
+  h1{font-size:1.6rem}
+  .gloss{width:calc(100vw - 1.6rem);bottom:.7rem;padding:.7rem .9rem}
+  .cgrid{grid-template-columns:1fr}
+}
 @media print{
   [data-theme]{--paper:#fff;--ink:#1b1813;--soft:#4f483e;--rule:#d6cbb6;--faint:#8b8071;--ghost:#9a9082;
     --gold:#8a6620;--wash:#f7edd9;--gold-line:rgba(138,102,32,.65);--gold-tint:rgba(246,236,216,.9);
